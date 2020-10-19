@@ -24,12 +24,13 @@
 #include "factory/legged-robots.hpp"
 #include "factory/arm.hpp"
 #include "factory/arm-kinova.hpp"
+#include "factory/arm-kuka.hpp"
 
 #define STDDEV(vec) std::sqrt(((vec - vec.mean())).square().sum() / (static_cast<double>(vec.size()) - 1))
 #define AVG(vec) (vec.mean())
 
 void print_benchmark(RobotEENames robot) {
-  unsigned int N = 100;  // number of nodes
+  unsigned int N = 80;  // number of nodes
   unsigned int T = 1e3;  // number of trials
 
   // Building the running and terminal models
@@ -38,6 +39,8 @@ void print_benchmark(RobotEENames robot) {
     crocoddyl::benchmark::build_arm_action_models(runningModel, terminalModel);
   } else if (robot.robot_name == "Kinova_arm") {
     crocoddyl::benchmark::build_arm_kinova_action_models(runningModel, terminalModel);
+  } else if (robot.robot_name == "Kuka_arm") {
+    crocoddyl::benchmark::build_arm_kuka_action_models(runningModel, terminalModel);
   } else {
     crocoddyl::benchmark::build_contact_action_models(robot, runningModel, terminalModel);
   }
@@ -57,7 +60,13 @@ void print_benchmark(RobotEENames robot) {
             rm->get_differential());
     default_state << dm->get_pinocchio().referenceConfigurations[robot.reference_conf],
         Eigen::VectorXd::Zero(state->get_nv());
-  } else {
+  } else if (robot.robot_name=="Kuka_arm"){
+    boost::shared_ptr<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> > dm =
+        boost::static_pointer_cast<crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<double> >(
+            rm->get_differential());
+    default_state << 3.0020535764625e-05, 0.3491614109215945, -6.5913231790875e-05, -0.8727514773831355, -7.1713659020325e-05, -5.794373118614063e-05, 0.00010090719233645313,
+        Eigen::VectorXd::Zero(state->get_nv());
+  }  else {
     boost::shared_ptr<crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> > dm =
         boost::static_pointer_cast<crocoddyl::DifferentialActionModelContactFwdDynamicsTpl<double> >(
             rm->get_differential());
@@ -354,10 +363,8 @@ int main() {
 
   std::cout << "********************  Kuka Arm  ******************" << std::endl;
   RobotEENames kukaArm("Kuka_arm", contact_names, contact_types,
-                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/robots/kinova.urdf",
-                         EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf",
-                         "gripper_left_joint",
-                         "arm_up");
+                         "/home/jpfleging/ws_test/workspace/src/catkin/robots/robot_properties/robot_properties_iiwa/urdf/iiwa.urdf",
+                         "contact");
 
   print_benchmark(kukaArm);
   

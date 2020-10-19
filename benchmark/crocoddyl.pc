@@ -1,0 +1,22 @@
+prefix=/opt/openrobots
+exec_prefix=/opt/openrobots
+libdir=/opt/openrobots/lib
+bindir=/opt/openrobots/bin
+pkglibdir=/opt/openrobots/lib/crocoddyl
+includedir=/opt/openrobots/include
+datarootdir=/opt/openrobots/share
+pkgdatarootdir=/opt/openrobots/share
+docdir=/opt/openrobots/share/doc/crocoddyl
+doxygendocdir=/opt/openrobots/share/doc/crocoddyl/doxygen-html
+
+Name: crocoddyl
+Description: Contact RObot COntrol by Differential DYnamic programming Library (Crocoddyl)
+URL: https://github.com/loco-3d/crocoddyl
+Version: 1.5.0
+Requires: pinocchio >= 2.4.7, example-robot-data >= 3.2.0, eigenpy >= 2.2.0, eigen3 >= 3.0.5
+Conflicts: 
+Libs: -L${libdir}  -lcrocoddyl -L/usr/lib/x86_64-linux-gnu
+Libs.private: 
+Cflags:  -I${includedir}
+
+
