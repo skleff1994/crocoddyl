@@ -41,23 +41,28 @@ void build_arm_kuka_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstra
   typedef typename crocoddyl::ActuationModelFullTpl<Scalar> ActuationModelFull;
   typedef typename crocoddyl::DifferentialActionModelFreeFwdDynamicsTpl<Scalar> DifferentialActionModelFreeFwdDynamics;
   typedef typename crocoddyl::IntegratedActionModelEulerTpl<Scalar> IntegratedActionModelEuler;
-
-  // because urdf is not supported with all scalar types.
+  typedef Eigen::Matrix<double, Eigen::Dynamic, 1> VectorXs;
+  
+// because urdf is not supported with all scalar types.
   pinocchio::ModelTpl<double> modeld;
   pinocchio::urdf::buildModel("/home/jpfleging/ws_test/workspace/src/catkin/robots/robot_properties/robot_properties_iiwa/urdf/iiwa.urdf", modeld);
   //pinocchio::srdf::loadReferenceConfigurations(
     //  modeld, EXAMPLE_ROBOT_DATA_MODEL_DIR "/kinova_description/srdf/kinova.srdf", false);
   pinocchio::ModelTpl<Scalar> model(modeld.cast<Scalar>());
-
+  
+  // state 
   boost::shared_ptr<crocoddyl::StateMultibodyTpl<Scalar> > state =
       boost::make_shared<crocoddyl::StateMultibodyTpl<Scalar> >(
           boost::make_shared<pinocchio::ModelTpl<Scalar> >(model));
-
+  // We define an actuation model
+  boost::shared_ptr<ActuationModelFull> actuation = boost::make_shared<ActuationModelFull>(state);
+  // Goal 
   FramePlacement Mref(model.getFrameId("contact"),
                       pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.5), Scalar(.5), Scalar(.5))));
   boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelFramePlacement>(state, Mref);
   boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state);
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state);
+  boost::shared_ptr<CostModelAbstract> xLimCost = boost::make_shared<CostModelState>(state);
 
   // Create a cost model per the running and terminal action model.
   boost::shared_ptr<CostModelSum> runningCostModel = boost::make_shared<CostModelSum>(state);
@@ -67,23 +72,25 @@ void build_arm_kuka_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstra
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
   runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
   runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
+  runningCostModel->addCost("xLim", xLimCost, Scalar(1e-2));
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-
-  // We define an actuation model
-  boost::shared_ptr<ActuationModelFull> actuation = boost::make_shared<ActuationModelFull>(state);
+  terminalCostModel->addCost("xReg", xRegCost, Scalar(1));
+  terminalCostModel->addCost("xLim", xLimCost, Scalar(1));
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
   // inside DifferentialActionModelFullyActuated.
   boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> runningDAM =
       boost::make_shared<DifferentialActionModelFreeFwdDynamics>(state, actuation, runningCostModel);
+  boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> terminalDAM =
+      boost::make_shared<DifferentialActionModelFreeFwdDynamics>(state, actuation, terminalCostModel);
 
-  // VectorXs armature(state->get_nq());
-  // armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.;
-  // runningDAM->set_armature(armature);
+  VectorXs armature(state->get_nq());
+  armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
+  runningDAM->set_armature(armature);
   // terminalDAM->set_armature(armature);
   runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
-  terminalModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(0.));
+  terminalModel = boost::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(0.));
 }
 
 }  // namespace benchmark
