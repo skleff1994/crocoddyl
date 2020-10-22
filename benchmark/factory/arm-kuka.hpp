@@ -58,7 +58,7 @@ void build_arm_kuka_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstra
   boost::shared_ptr<ActuationModelFull> actuation = boost::make_shared<ActuationModelFull>(state);
   // Goal 
   FramePlacement Mref(model.getFrameId("contact"),
-                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(.5), Scalar(.5), Scalar(.5))));
+                      pinocchio::SE3Tpl<Scalar>(Matrix3s::Identity(), Vector3s(Scalar(-.5), Scalar(.3), Scalar(.5))));
   boost::shared_ptr<CostModelAbstract> goalTrackingCost = boost::make_shared<CostModelFramePlacement>(state, Mref);
   boost::shared_ptr<CostModelAbstract> xRegCost = boost::make_shared<CostModelState>(state);
   boost::shared_ptr<CostModelAbstract> uRegCost = boost::make_shared<CostModelControl>(state);
@@ -70,12 +70,12 @@ void build_arm_kuka_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstra
 
   // Then let's added the running and terminal cost functions
   runningCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  runningCostModel->addCost("xReg", xRegCost, Scalar(1e-4));
-  runningCostModel->addCost("uReg", uRegCost, Scalar(1e-4));
-  runningCostModel->addCost("xLim", xLimCost, Scalar(1e-2));
+  runningCostModel->addCost("xReg", xRegCost, Scalar(.1));
+  runningCostModel->addCost("uReg", uRegCost, Scalar(5e-2));
+  runningCostModel->addCost("xLim", xLimCost, Scalar(50));
   terminalCostModel->addCost("gripperPose", goalTrackingCost, Scalar(1));
-  terminalCostModel->addCost("xReg", xRegCost, Scalar(1));
-  terminalCostModel->addCost("xLim", xLimCost, Scalar(1));
+  terminalCostModel->addCost("xReg", xRegCost, Scalar(1e-1));
+  terminalCostModel->addCost("xLim", xLimCost, Scalar(50));
 
   // Next, we need to create an action model for running and terminal knots. The
   // forward dynamics (computed using ABA) are implemented
@@ -89,7 +89,7 @@ void build_arm_kuka_action_models(boost::shared_ptr<crocoddyl::ActionModelAbstra
   armature << 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1;
   runningDAM->set_armature(armature);
   // terminalDAM->set_armature(armature);
-  runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(1e-3));
+  runningModel = boost::make_shared<IntegratedActionModelEuler>(runningDAM, Scalar(5e-2));
   terminalModel = boost::make_shared<IntegratedActionModelEuler>(terminalDAM, Scalar(0.));
 }
 
