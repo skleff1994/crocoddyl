@@ -11,6 +11,7 @@
 
 #include <Eigen/Cholesky>
 #include <vector>
+#include <crocoddyl/core/utils/timer.hpp>
 
 #include "crocoddyl/core/solver-base.hpp"
 
@@ -280,6 +281,10 @@ class SolverDDP : public SolverAbstract {
    */
   void set_th_gaptol(const double& th_gaptol);
 
+  // Times
+  double total_time_calc_, total_time_calcDiff_, total_time_backwardPass_, total_time_forwardPass_; 
+  int counter_calc_, counter_calcDiff_, counter_backwardPass_, counter_forwardPass_;
+
  protected:
   double regfactor_;  //!< Regularization factor used to decrease / increase it
   double regmin_;     //!< Minimum allowed regularization value
@@ -314,6 +319,11 @@ class SolverDDP : public SolverAbstract {
   double th_stepdec_;  //!< Step-length threshold used to decrease regularization
   double th_stepinc_;  //!< Step-length threshold used to increase regularization
   bool was_feasible_;  //!< Label that indicates in the previous iterate was feasible
+
+  crocoddyl::Timer timer_calc_;
+  crocoddyl::Timer timer_calcDiff_;
+  crocoddyl::Timer timer_forwardPass_;
+  crocoddyl::Timer timer_backwardPass_;
 };
 
 }  // namespace crocoddyl

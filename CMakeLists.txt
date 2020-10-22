@@ -41,10 +41,10 @@ SET(PROJECT_USE_CMAKE_EXPORT True)
 
 # Create different building options
 OPTION(ENABLE_VECTORIZATION "Enable vectorization and further processor-related optimizations" OFF)
-OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" ON)
-OPTION(BUILD_UNIT_TESTS "Build the unitary tests" ON)
-OPTION(BUILD_BENCHMARK "Build the benchmark" ON)
-OPTION(BUILD_EXAMPLES "Build the examples" ON)
+OPTION(BUILD_PYTHON_INTERFACE "Build the python binding" OFF)
+OPTION(BUILD_UNIT_TESTS "Build the unitary tests" OFF)
+OPTION(BUILD_BENCHMARK "Build the benchmark" OFF)
+OPTION(BUILD_EXAMPLES "Build the examples" OFF)
 
 
 IF(ENABLE_VECTORIZATION)
@@ -67,7 +67,7 @@ ADD_OPTIONAL_DEPENDENCY("scipy")
 
 OPTION(BUILD_WITH_CODEGEN_SUPPORT "Build the library with the Code Generation support (required CppADCodeGen)" OFF)
 
-OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" OFF)
+OPTION(BUILD_WITH_MULTITHREADS "Build the library with the Multithreading support (required OpenMP)" ON)
 IF(BUILD_WITH_MULTITHREADS)
   INCLUDE(ProcessorCount)
   ProcessorCount(NPROCESSOR)

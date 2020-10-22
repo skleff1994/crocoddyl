@@ -22,7 +22,15 @@ SolverDDP::SolverDDP(boost::shared_ptr<ShootingProblem> problem)
       th_gaptol_(1e-9),
       th_stepdec_(0.5),
       th_stepinc_(0.01),
-      was_feasible_(false) {
+      was_feasible_(false),
+      total_time_calc_(0),
+      total_time_calcDiff_(0), 
+      total_time_backwardPass_(0), 
+      total_time_forwardPass_(0),
+      counter_calc_(0), 
+      counter_calcDiff_(0),
+      counter_backwardPass_(0), 
+      counter_forwardPass_(0) {
   allocateData();
 
   const std::size_t& n_alphas = 10;
@@ -122,11 +130,18 @@ void SolverDDP::computeDirection(const bool& recalcDiff) {
   if (recalcDiff) {
     calcDiff();
   }
+  counter_backwardPass_++;
+  timer_backwardPass_.reset();
   backwardPass();
+  total_time_backwardPass_ += timer_backwardPass_.get_duration();
 }
 
 double SolverDDP::tryStep(const double& steplength) {
+
+  counter_forwardPass_++;
+  timer_forwardPass_.reset();
   forwardPass(steplength);
+  total_time_forwardPass_ += timer_forwardPass_.get_duration();
   return cost_ - cost_try_;
 }
 
@@ -158,8 +173,17 @@ const Eigen::Vector2d& SolverDDP::expectedImprovement() {
 }
 
 double SolverDDP::calcDiff() {
-  if (iter_ == 0) problem_->calc(xs_, us_);
-  cost_ = problem_->calcDiff(xs_, us_);
+  if (iter_ == 0) 
+  {
+    counter_calc_++;
+    timer_calc_.reset();
+    problem_->calc(xs_, us_);
+    total_time_calc_ += timer_calc_.get_duration();
+  }
+    counter_calcDiff_++;
+    timer_calcDiff_.reset();
+    cost_ = problem_->calcDiff(xs_, us_);
+    total_time_calcDiff_ += timer_calcDiff_.get_duration();
 
   if (!is_feasible_) {
     const Eigen::VectorXd& x0 = problem_->get_x0();
