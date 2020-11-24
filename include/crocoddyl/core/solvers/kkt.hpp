@@ -12,14 +12,17 @@
 
 #include <Eigen/Dense>
 #include <Eigen/Cholesky>
+
 #include "crocoddyl/core/solver-base.hpp"
 
 namespace crocoddyl {
 
 class SolverKKT : public SolverAbstract {
  public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
   explicit SolverKKT(boost::shared_ptr<ShootingProblem> problem);
-  ~SolverKKT();
+  virtual ~SolverKKT();
 
   virtual bool solve(const std::vector<Eigen::VectorXd>& init_xs = DEFAULT_VECTOR,
                      const std::vector<Eigen::VectorXd>& init_us = DEFAULT_VECTOR, const std::size_t& maxiter = 100,
@@ -34,6 +37,7 @@ class SolverKKT : public SolverAbstract {
   const Eigen::VectorXd& get_primaldual() const;
   const std::vector<Eigen::VectorXd>& get_dxs() const;
   const std::vector<Eigen::VectorXd>& get_dus() const;
+  const std::vector<Eigen::VectorXd>& get_lambdas() const;
   const std::size_t& get_nx() const;
   const std::size_t& get_ndx() const;
   const std::size_t& get_nu() const;
@@ -67,7 +71,6 @@ class SolverKKT : public SolverAbstract {
   Eigen::VectorXd dual_;
   std::vector<double> alphas_;
   double th_grad_;
-  double th_step_;
   bool was_feasible_;
   Eigen::VectorXd kkt_primal_;
   Eigen::VectorXd dF;

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -17,18 +17,32 @@
 #define BOOST_TEST_NO_MAIN
 #define BOOST_TEST_ALTERNATIVE_INIT_API
 
+#define NUMDIFF_MODIFIER 3e4
+
+#include <iterator>
 #include <Eigen/Dense>
 #include <boost/bind.hpp>
 #include <boost/test/included/unit_test.hpp>
 #include <boost/test/execution_monitor.hpp>  // for execution_exception
 #include <boost/function.hpp>
 
+#if __cplusplus >= 201103L
+#include <random>
+std::mt19937 rng;
+#else
+#include <boost/random.hpp>
+#include <boost/nondet_random.hpp>
+boost::random::mt19937 rng;
+#endif
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string>
+#include "crocoddyl/core/utils/exception.hpp"
 
-namespace crocoddyl_unit_test {
+namespace crocoddyl {
+namespace unittest {
 
 class CaptureIOStream {
  public:
@@ -36,12 +50,12 @@ class CaptureIOStream {
     m_pipe[READ] = 0;
     m_pipe[WRITE] = 0;
     if (pipe(m_pipe) == -1) {
-      throw std::runtime_error("Cannot create pipe.");
+      throw_pretty("Cannot create pipe.");
     }
     m_oldStdOut = dup(fileno(stdout));
     m_oldStdErr = dup(fileno(stderr));
     if (m_oldStdOut == -1 || m_oldStdErr == -1) {
-      throw std::runtime_error("Cannot redirect stdout or stderr.");
+      throw_pretty("Cannot redirect stdout or stderr.");
     }
 
     m_init = true;
@@ -134,6 +148,25 @@ std::string GetErrorMessages(boost::function<int(void)> function_with_errors) {
   return capture_ios.str();
 }
 
-}  // namespace crocoddyl_unit_test
+template <typename IntType>
+IntType random_int_in_range(IntType first = 0, IntType last = 10) {
+#if __cplusplus >= 201103L
+  return std::uniform_int_distribution<IntType>(first, last)(rng);
+#else
+  return boost::random::uniform_int_distribution<IntType>(first, last)(rng);
+#endif
+}
+
+template <typename RealType>
+RealType random_real_in_range(RealType first = 0, RealType last = 1) {
+#if __cplusplus >= 201103L
+  return std::uniform_real_distribution<RealType>(first, last)(rng);
+#else
+  return boost::random::uniform_real_distribution<RealType>(first, last)(rng);
+#endif
+}
+
+}  // namespace unittest
+}  // namespace crocoddyl
 
 #endif  // CROCODDYL_UNITTEST_COMMON_HPP_

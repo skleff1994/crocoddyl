@@ -6,11 +6,9 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import (CoMPositionCostDerived, ControlCostDerived, FramePlacementCostDerived,
-                             FrameRotationCostDerived, FrameTranslationCostDerived, FrameVelocityCostDerived,
-                             StateCostDerived)
-
-crocoddyl.switchToNumpyMatrix()
+from crocoddyl.utils import (CoMPositionCostModelDerived, ControlCostModelDerived, FramePlacementCostModelDerived,
+                             FrameRotationCostModelDerived, FrameTranslationCostModelDerived,
+                             FrameVelocityCostModelDerived, StateCostModelDerived)
 
 
 class CostModelAbstractTestCase(unittest.TestCase):
@@ -24,8 +22,9 @@ class CostModelAbstractTestCase(unittest.TestCase):
         self.x = self.ROBOT_STATE.rand()
         self.u = pinocchio.utils.rand(self.ROBOT_MODEL.nv)
 
-        self.data = self.COST.createData(self.robot_data)
-        self.data_der = self.COST_DER.createData(self.robot_data)
+        self.multibody_data = crocoddyl.DataCollectorMultibody(self.robot_data)
+        self.data = self.COST.createData(self.multibody_data)
+        self.data_der = self.COST_DER.createData(self.multibody_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
@@ -53,7 +52,10 @@ class CostModelAbstractTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calc for both action models
+        self.COST.calc(self.data, self.x, self.u)
         self.COST.calcDiff(self.data, self.x, self.u)
+
+        self.COST_DER.calc(self.data_der, self.x, self.u)
         self.COST_DER.calcDiff(self.data_der, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_der.cost, 10, "Wrong cost value.")
@@ -79,8 +81,9 @@ class CostModelSumTestCase(unittest.TestCase):
         self.cost_sum = crocoddyl.CostModelSum(self.ROBOT_STATE)
         self.cost_sum.addCost('myCost', self.COST, 1.)
 
-        self.data = self.COST.createData(self.robot_data)
-        self.data_sum = self.cost_sum.createData(self.robot_data)
+        self.multibody_data = crocoddyl.DataCollectorMultibody(self.robot_data)
+        self.data = self.COST.createData(self.multibody_data)
+        self.data_sum = self.cost_sum.createData(self.multibody_data)
 
         nq, nv = self.ROBOT_MODEL.nq, self.ROBOT_MODEL.nv
         pinocchio.forwardKinematics(self.ROBOT_MODEL, self.robot_data, self.x[:nq], self.x[nq:])
@@ -104,15 +107,16 @@ class CostModelSumTestCase(unittest.TestCase):
         self.cost_sum.calc(self.data_sum, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_sum.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9), "Wrong cost residuals.")
 
     def test_calcDiff(self):
         # Run calc for both action models
+        self.COST.calc(self.data, self.x, self.u)
         self.COST.calcDiff(self.data, self.x, self.u)
+
+        self.cost_sum.calc(self.data_sum, self.x, self.u)
         self.cost_sum.calcDiff(self.data_sum, self.x, self.u)
         # Checking the cost value and its residual
         self.assertAlmostEqual(self.data.cost, self.data_sum.cost, 10, "Wrong cost value.")
-        self.assertTrue(np.allclose(self.data.r, self.data_sum.r, atol=1e-9), "Wrong cost residuals.")
         # Checking the Jacobians and Hessians of the cost
         self.assertTrue(np.allclose(self.data.Lx, self.data_sum.Lx, atol=1e-9), "Wrong Lx.")
         self.assertTrue(np.allclose(self.data.Lu, self.data_sum.Lu, atol=1e-9), "Wrong Lu.")
@@ -130,7 +134,7 @@ class StateCostTest(CostModelAbstractTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     COST = crocoddyl.CostModelState(ROBOT_STATE)
-    COST_DER = StateCostDerived(ROBOT_STATE)
+    COST_DER = StateCostModelDerived(ROBOT_STATE)
 
 
 class StateCostSumTest(CostModelSumTestCase):
@@ -145,7 +149,7 @@ class ControlCostTest(CostModelAbstractTestCase):
     ROBOT_STATE = crocoddyl.StateMultibody(ROBOT_MODEL)
 
     COST = crocoddyl.CostModelControl(ROBOT_STATE)
-    COST_DER = ControlCostDerived(ROBOT_STATE)
+    COST_DER = ControlCostModelDerived(ROBOT_STATE)
 
 
 class ControlCostSumTest(CostModelSumTestCase):
@@ -161,7 +165,7 @@ class CoMPositionCostTest(CostModelAbstractTestCase):
 
     cref = pinocchio.utils.rand(3)
     COST = crocoddyl.CostModelCoMPosition(ROBOT_STATE, cref)
-    COST_DER = CoMPositionCostDerived(ROBOT_STATE, cref=cref)
+    COST_DER = CoMPositionCostModelDerived(ROBOT_STATE, cref=cref)
 
 
 class CoMPositionCostSumTest(CostModelSumTestCase):
@@ -178,7 +182,7 @@ class FramePlacementCostTest(CostModelAbstractTestCase):
 
     Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random())
     COST = crocoddyl.CostModelFramePlacement(ROBOT_STATE, Mref)
-    COST_DER = FramePlacementCostDerived(ROBOT_STATE, Mref=Mref)
+    COST_DER = FramePlacementCostModelDerived(ROBOT_STATE, Mref=Mref)
 
 
 class FramePlacementCostSumTest(CostModelSumTestCase):
@@ -195,7 +199,7 @@ class FrameTranslationCostTest(CostModelAbstractTestCase):
 
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.utils.rand(3))
     COST = crocoddyl.CostModelFrameTranslation(ROBOT_STATE, xref)
-    COST_DER = FrameTranslationCostDerived(ROBOT_STATE, xref=xref)
+    COST_DER = FrameTranslationCostModelDerived(ROBOT_STATE, xref=xref)
 
 
 class FrameTranslationCostSumTest(CostModelSumTestCase):
@@ -212,7 +216,7 @@ class FrameRotationCostTest(CostModelAbstractTestCase):
 
     Rref = crocoddyl.FrameRotation(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random().rotation)
     COST = crocoddyl.CostModelFrameRotation(ROBOT_STATE, Rref)
-    COST_DER = FrameRotationCostDerived(ROBOT_STATE, Rref=Rref)
+    COST_DER = FrameRotationCostModelDerived(ROBOT_STATE, Rref=Rref)
 
 
 class FrameRotationCostSumTest(CostModelSumTestCase):
@@ -229,7 +233,7 @@ class FrameVelocityCostTest(CostModelAbstractTestCase):
 
     vref = crocoddyl.FrameMotion(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.Motion.Random())
     COST = crocoddyl.CostModelFrameVelocity(ROBOT_STATE, vref)
-    COST_DER = FrameVelocityCostDerived(ROBOT_STATE, vref=vref)
+    COST_DER = FrameVelocityCostModelDerived(ROBOT_STATE, vref=vref)
 
 
 class FrameVelocityCostSumTest(CostModelSumTestCase):

@@ -1,10 +1,42 @@
 
+<p align="center">
+  <img src="./doc/images/crocoddyl_logo.png" width="800" alt="Crocoddyl Logo" align="center"/>
+</p>
+
+## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
+
 <img align="right" src="https://i.imgur.com/o2LfbDq.gif" width="25%"/>
 
-Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
-===============================================
+**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20icra.html)** is an optimal control library for robot control under contact sequence.
+Its solvers are based on novel and efficient Differential Dynamic Programming (DDP) algorithms.
+**Crocoddyl** computes optimal trajectories along with optimal feedback gains.
+It uses **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)** for fast computation of robots dynamics and their analytical derivatives.
 
 
+The source code is released under the [BSD 3-Clause license](LICENSE).
+
+**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) <br />
+**Instructors:** Nicolas Mansard <br />
+**With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
+
+[![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
+[![CI build status](https://travis-ci.org/loco-3d/crocoddyl.svg?branch=devel)](https://travis-ci.org/loco-3d/crocoddyl)
+[![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
+[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
+[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
+[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://github.com/loco-3d/crocoddyl/graphs/contributors)
+
+[![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
+[![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
+
+If you want to follow the current developments, you can directly refer to the [devel branch](https://github.com/loco-3d/cddp/tree/devel).
+
+
+## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
+**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
+
+## Crocoddyl features
 <table >
   <tr>
     <td align="left"><img src="https://cmastalli.github.io/assets/img/publications/highly_dynamic_maneuvers.png" width="10000"/></td>
@@ -13,54 +45,23 @@ Contact RObot COntrol by Differential DYnamic programming Library (crocoddyl)
 </table>
 
 
-## <img align="center" height="20" src="https://i.imgur.com/vAYeCzC.png"/> Introduction
-
-**[Crocoddyl](https://cmastalli.github.io/publications/crocoddyl20unpub.html)** is an optimal control library for robot control under contact sequence.
-Its solver is based on an efficient Differential Dynamic Programming (DDP) algorithm.
-**Crocoddyl** computes optimal trajectories along to optimal feedback gains.
-It uses **Pinocchio** for fast computation of robot dynamics and its analytical derivatives.
-
-The source code is released under the [BSD 3-Clause license](LICENSE).
-
-**Authors:** [Carlos Mastalli](https://cmastalli.github.io/) and Rohan Budhiraja <br />
-**Instructors:** Nicolas Mansard <br />
-**With additional support from the Gepetto team at LAAS-CNRS and MEMMO project. For more details see Section Credits**
-
-[![License BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg?style=flat)](https://tldrlegal.com/license/bsd-3-clause-license-%28revised%29#fulltext)
-[![pipeline status](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/pipeline.svg)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/pipelines?ref=devel)
-[![coverage report](https://gepgitlab.laas.fr/loco-3d/crocoddyl/badges/devel/coverage.svg)](https://gepettoweb.laas.fr/doc/loco-3d/crocoddyl/devel/coverage/)
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/tags)
-[![GitHub repo size](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)](https://img.shields.io/github/repo-size/loco-3d/crocoddyl)
-[![contributors](https://img.shields.io/github/contributors/loco-3d/crocoddyl)](https://gepgitlab.laas.fr/loco-3d/crocoddyl/-/graphs/master)
-
-[![GitHub Release Date](https://img.shields.io/github/release-date/loco-3d/crocoddyl)](https://img.shields.io/github/release-date/loco-3d/crocoddyl)
-[![GitHub last commit](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)](https://img.shields.io/github/last-commit/loco-3d/crocoddyl)
-
-If you want to follow the current developments, you can directly refer to the [devel branch](https://gepgitlab.laas.fr/loco-3d/cddp/tree/devel).
-
-
-## <img align="center" height="20" src="https://i.imgur.com/x1morBF.png"/> Installation
-**Crocoddyl** can be easily installed on various Linux (Ubuntu, Fedora, etc.) and Unix distributions (Mac OS X, BSD, etc.).
-
-## Crocoddyl features
 **Crocoddyl** is versatible:
 
  * various optimal control solvers (DDP, FDDP, BoxDDP, etc) - single and multi-shooting methods
- * analytical and sparse derivatives
- * geometrical systems friendly (with SE(3) manifold support)
+ * analytical and sparse derivatives via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
+ * Euclidian and non-Euclidian geometry friendly via **[Pinocchio](https://github.com/stack-of-tasks/pinocchio)**
  * handle autonomous and nonautomous dynamical systems
  * numerical differentiation support
-<!-- * automatic differentiation support -->
+ * automatic differentiation support
 
 **Crocoddyl** is efficient and flexible:
 
  * cache friendly,
  * multi-thread friendly
  * Python bindings (including models and solvers abstractions)
- * C++98/11/14/17/20 compliant
+ * C++ 98/11/14/17/20 compliant
  * extensively tested
- <!-- * automatic code generation support -->
- 
+ * automatic code generation support
 
 ### Installation through robotpkg
 
@@ -115,7 +116,7 @@ export PYTHONPATH=/opt/openrobots/lib/python2.7/site-packages:$PYTHONPATH
 **Crocoddyl** is c++ library with Python bindings for versatile and fast prototyping. It has the following dependencies:
 
 * [pinocchio](https://github.com/stack-of-tasks/pinocchio)
-* [example-robot-data](https://gepgitlab.laas.fr/gepetto/example-robot-data) (optional for examples, install Python loaders)
+* [example-robot-data](https://github.com/gepetto/example-robot-data) (optional for examples, install Python loaders)
 * [gepetto-viewer-corba](https://github.com/Gepetto/gepetto-viewer-corba) (optional for display)
 * [jupyter](https://jupyter.org/) (optional for notebooks)
 * [matplotlib](https://matplotlib.org/) (optional for examples)
@@ -127,32 +128,40 @@ You can run examples, unit-tests and benchmarks from your build dir:
 cd build
 make test
 make -s examples-quadrupedal_gaits INPUT="display plot" # enable display and plot
-make -s benchmarks-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
+make -s benchmarks-cpp-quadrupedal_gaits INPUT="100 walk" # number of trials ; type of gait
 ```
 
-Alternatively, you cansee the 3D result and/or graphs of your run examples, you can use
+Alternatively, you can see the 3D result and/or graphs of your run examples (through gepetto-viewer and matplotlib), you can use
 
 ```bash
 export CROCODDYL_DISPLAY=1
 export CROCODDYL_PLOT=1
 ```
 
+After installation, you could run the examples as follows:
+
+```bash
+python -m crocoddyl.examples.quadrupedal_gaits "display" "plot" # enable display and plot
+```
+
 If you want to learn about Crocoddyl, take a look at the Jupyter notebooks. Start in the following order.
-- [examples/notebooks/unicycle_towards_origin.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
-- [examples/notebooks/cartpole_swing_up.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
-- [examples/notebooks/arm_manipulation.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
-- [examples/notebooks/bipedal_walking.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
-- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://gepgitlab.laas.fr/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
+- [examples/notebooks/unicycle_towards_origin.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/unicycle_towards_origin.ipynb)
+- [examples/notebooks/cartpole_swing_up.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/cartpole_swing_up.py)
+- [examples/notebooks/arm_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/arm_manipulation.ipynb)
+- [examples/notebooks/whole_body_manipulation.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/whole_body_manipulation.ipynb)
+- [examples/notebooks/bipedal_walking.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/bipedal_walking.ipynb)
+- [examples/notebooks/introduction_to_crocoddyl.ipynb](https://github.com/loco-3d/crocoddyl/blob/devel/examples/notebooks/introduction_to_crocoddyl.ipynb)
 
 
 ## Citing Crocoddyl
 
 To cite **Crocoddyl** in your academic research, please use the following bibtex lines:
 ```tex
-@unpublished{mastalli2020crocoddyl,
+@inproceedings{mastalli20crocoddyl,
   author={Mastalli, Carlos and Budhiraja, Rohan and Merkt, Wolfgang and Saurel, Guilhem and Hammoud, Bilal
-  and Naveau, Maximilien and Carpentier, Justin and Vijayakumar, Sethu and Mansard, Nicolas},
+  and Naveau, Maximilien and Carpentier, Justin, Righetti, Ludovic and Vijayakumar, Sethu and Mansard, Nicolas},
   title={{Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control}},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
   year={2020}
 }
 ```
@@ -161,7 +170,7 @@ and the following one to reference this website:
 @misc{crocoddylweb,
    author = {Carlos Mastalli, Rohan Budhiraja and Nicolas Mansard and others},
    title = {Crocoddyl: a fast and flexible optimal control library for robot control under contact sequence},
-   howpublished = {https://gepgitlab.laas.fr/loco-3d/crocoddyl/wikis/home},
+   howpublished = {https://github.com/loco-3d/crocoddyl/wikis/home},
    year = {2019}
 }
 ```
@@ -170,15 +179,16 @@ The rest of the publications describes different component of **Crocoddyl**:
 
 
 ### Publications
-- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20unpub.html), pre-print, 2020
+- C. Mastalli et al. [Crocoddyl: An Efficient and Versatile Framework for Multi-Contact Optimal Control](https://cmastalli.github.io/publications/crocoddyl20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 - R. Budhiraja, J. Carpentier, C. Mastalli and N. Mansard. [Differential Dynamic Programming for Multi-Phase Rigid Contact Dynamics](https://cmastalli.github.io/publications/mddp18.html), IEEE RAS International Conference on Humanoid Robots (ICHR), 2018
 - Y. Tassa, N. Mansard, E. Todorov. [Control-Limited Differential Dynamic Programming](https://homes.cs.washington.edu/~todorov/papers/TassaICRA14.pdf), IEEE International Conference on Automation and Robotics (ICRA), 2014
 - R. Budhiraja, J. Carpentier and N. Mansard. [Dynamics Consensus between Centroidal and Whole-Body Models for Locomotion of Legged Robots](https://hal.laas.fr/hal-01875031/document), IEEE International Conference on Automation and Robotics (ICRA), 2019
+- T. G. Lembono, C. Mastalli, P. Fernbach, N. Mansard and S. Calinon. [Learning How to Walk: Warm-starting Optimal Control Solver with Memory of Motion](https://cmastalli.github.io/publications/learningwalk20icra.html), IEEE International Conference on Robotics and Automation (ICRA), 2020
 
 
 ## Questions and Issues
 
-You have a question or an issue? You may either directly open a [new issue](https://gepgitlab.laas.fr/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
+You have a question or an issue? You may either directly open a [new issue](https://github.com/loco-3d/crocoddyl/issues) or use the mailing list <crocoddyl@laas.fr>.
 
 
 ## Credits
@@ -187,15 +197,16 @@ The following people have been involved in the development of **Crocoddyl**:
 
 - [Carlos Mastalli](https://cmastalli.github.io/) (University of Edinburgh): main developer and manager of the project
 - [Nicolas Mansard](http://projects.laas.fr/gepetto/index.php/Members/NicolasMansard) (LAAS-CNRS): project instructor
-- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): features extension
+- [Rohan Budhiraja](https://scholar.google.com/citations?user=NW9Io9AAAAAJ) (LAAS-CNRS): core development and features extension
 - [Justin Carpentier](https://jcarpent.github.io/) (INRIA): efficient analytical rigid-body dynamics derivatives
 - [Maximilien Naveau](https://scholar.google.fr/citations?user=y_-cGlUAAAAJ&hl=fr) (MPI): unit-test support
 - [Guilhem Saurel](http://projects.laas.fr/gepetto/index.php/Members/GuilhemSaurel) (LAAS-CNRS): continuous integration and deployment
-- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Edinburgh): feature extension and debugging
-- [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (UPC): feature extension
+- [Wolfgang Merkt](http://www.wolfgangmerkt.com/research/) (University of Oxford): feature extension and debugging
+- [Josep Martí Saumell](https://www.iri.upc.edu/staff/jmarti) (IRI: CSIC-UPC): feature extension
 - [Bilal Hammoud](https://scholar.google.com/citations?hl=en&user=h_4NKpsAAAAJ) (MPI): features extension
 
 
 ## Acknowledgments
 
-The development of **Pinocchio** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).
+The development of **Crocoddyl** is supported by the [EU MEMMO project](http://www.memmo-project.eu/), and the [EU RoboCom++ project](http://robocomplusplus.eu/).
+It is maintained by the [Gepetto team](http://projects.laas.fr/gepetto/) [@LAAS-CNRS](http://www.laas.fr), and the [Statistical Machine Learning and Motor Control Group](http://wcms.inf.ed.ac.uk/ipab/slmc) [@University of Edinburgh](https://www.edinburgh-robotics.org/).

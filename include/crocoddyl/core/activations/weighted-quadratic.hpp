@@ -9,40 +9,108 @@
 #ifndef CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
 #define CROCODDYL_CORE_ACTIVATIONS_WEIGHTED_QUADRATIC_HPP_
 
-#include "crocoddyl/core/activation-base.hpp"
 #include <stdexcept>
+
+#include "crocoddyl/core/fwd.hpp"
+#include "crocoddyl/core/utils/exception.hpp"
+#include "crocoddyl/core/activation-base.hpp"
 
 namespace crocoddyl {
 
-class ActivationModelWeightedQuad : public ActivationModelAbstract {
+template <typename _Scalar>
+class ActivationModelWeightedQuadTpl : public ActivationModelAbstractTpl<_Scalar> {
  public:
-  explicit ActivationModelWeightedQuad(const Eigen::VectorXd& weights);
-  ~ActivationModelWeightedQuad();
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r);
-  void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& r,
-                const bool& recalc = true);
-  boost::shared_ptr<ActivationDataAbstract> createData();
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ActivationModelAbstractTpl<Scalar> Base;
+  typedef ActivationDataAbstractTpl<Scalar> ActivationDataAbstract;
+  typedef ActivationDataWeightedQuadTpl<Scalar> Data;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
 
-  const Eigen::VectorXd& get_weights() const;
-  void set_weights(const Eigen::VectorXd& weights);
+  explicit ActivationModelWeightedQuadTpl(const VectorXs& weights)
+      : Base(weights.size()), weights_(weights), new_weights_(false){};
+  virtual ~ActivationModelWeightedQuadTpl(){};
 
- private:
-  Eigen::VectorXd weights_;
+  virtual void calc(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw_pretty("Invalid argument: "
+                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+
+    d->Wr = weights_.cwiseProduct(r);
+    data->a_value = Scalar(0.5) * r.dot(d->Wr);
+  };
+
+  virtual void calcDiff(const boost::shared_ptr<ActivationDataAbstract>& data, const Eigen::Ref<const VectorXs>& r) {
+    if (static_cast<std::size_t>(r.size()) != nr_) {
+      throw_pretty("Invalid argument: "
+                   << "r has wrong dimension (it should be " + std::to_string(nr_) + ")");
+    }
+
+    boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
+    data->Ar = d->Wr;
+    if (new_weights_) {
+      data->Arr.diagonal() = weights_;
+      new_weights_ = false;
+    }
+    // The Hessian has constant values which were set in createData.
+#ifndef NDEBUG
+    assert_pretty(MatrixXs(data->Arr).isApprox(Arr_), "Arr has wrong value");
+#endif
+  };
+
+  virtual boost::shared_ptr<ActivationDataAbstract> createData() {
+    boost::shared_ptr<Data> data = boost::allocate_shared<Data>(Eigen::aligned_allocator<Data>(), this);
+    data->Arr.diagonal() = weights_;
 
 #ifndef NDEBUG
-  Eigen::MatrixXd Arr_;
+    Arr_ = data->Arr;
+#endif
+
+    return data;
+  };
+
+  const VectorXs& get_weights() const { return weights_; };
+  void set_weights(const VectorXs& weights) {
+    if (weights.size() != weights_.size()) {
+      throw_pretty("Invalid argument: "
+                   << "weight vector has wrong dimension (it should be " + std::to_string(weights_.size()) + ")");
+    }
+
+    weights_ = weights;
+    new_weights_ = true;
+  };
+
+ protected:
+  using Base::nr_;
+
+ private:
+  VectorXs weights_;
+  bool new_weights_;
+
+#ifndef NDEBUG
+  MatrixXs Arr_;
 #endif
 };
 
-struct ActivationDataWeightedQuad : public ActivationDataAbstract {
+template <typename _Scalar>
+struct ActivationDataWeightedQuadTpl : public ActivationDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Activation>
-  explicit ActivationDataWeightedQuad(Activation* const activation)
-      : ActivationDataAbstract(activation), Wr(Eigen::VectorXd::Zero(activation->get_nr())) {}
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef ActivationDataAbstractTpl<Scalar> Base;
 
-  Eigen::VectorXd Wr;
+  template <typename Activation>
+  explicit ActivationDataWeightedQuadTpl(Activation* const activation)
+      : Base(activation), Wr(VectorXs::Zero(activation->get_nr())) {}
+
+  VectorXs Wr;
 };
 
 }  // namespace crocoddyl

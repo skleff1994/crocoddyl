@@ -16,10 +16,11 @@ class SimpleBipedGaitProblem:
         self.lfId = self.rmodel.getFrameId(leftFoot)
         # Defining default state
         q0 = self.rmodel.referenceConfigurations["half_sitting"]
-        self.rmodel.defaultState = np.concatenate([q0, np.zeros((self.rmodel.nv, 1))])
+        self.rmodel.defaultState = np.concatenate([q0, np.zeros(self.rmodel.nv)])
         self.firstStep = True
-        # Remove the armature
-        # self.rmodel.armature[6:] = 1.
+        # Defining the friction coefficient and normal
+        self.mu = 0.7
+        self.nsurf = np.array([0., 0., 1.])
 
     def createWalkingProblem(self, x0, stepLength, stepHeight, timeStep, stepKnots, supportKnots):
         """ Create a shooting problem for a simple walking gait.
@@ -84,14 +85,14 @@ class SimpleBipedGaitProblem:
         flyingUpPhase = [
             self.createSwingFootModel(
                 timeStep, [],
-                np.matrix([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight]).T * (k + 1) / flyingKnots +
-                comRef) for k in range(flyingKnots)
+                np.array([jumpLength[0], jumpLength[1], jumpLength[2] + jumpHeight]) * (k + 1) / flyingKnots + comRef)
+            for k in range(flyingKnots)
         ]
         flyingDownPhase = []
         for k in range(flyingKnots):
             flyingDownPhase += [self.createSwingFootModel(timeStep, [])]
 
-        f0 = np.matrix(jumpLength).T
+        f0 = jumpLength
         footTask = [
             crocoddyl.FramePlacement(self.lfId, pinocchio.SE3(np.eye(3), self.lfId + f0)),
             crocoddyl.FramePlacement(self.rfId, pinocchio.SE3(np.eye(3), self.rfId + f0))
@@ -142,17 +143,17 @@ class SimpleBipedGaitProblem:
                 # swing-leg motion.
                 phKnots = numKnots / 2
                 if k < phKnots:
-                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots]]).T
+                    dp = np.array([stepLength * (k + 1) / numKnots, 0., stepHeight * k / phKnots])
                 elif k == phKnots:
-                    dp = np.matrix([[stepLength * (k + 1) / numKnots, 0., stepHeight]]).T
+                    dp = np.array([stepLength * (k + 1) / numKnots, 0., stepHeight])
                 else:
-                    dp = np.matrix(
-                        [[stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)]]).T
-                tref = np.asmatrix(p + dp)
+                    dp = np.array(
+                        [stepLength * (k + 1) / numKnots, 0., stepHeight * (1 - float(k - phKnots) / phKnots)])
+                tref = p + dp
 
                 swingFootTask += [crocoddyl.FramePlacement(i, pinocchio.SE3(np.eye(3), tref))]
 
-            comTask = np.matrix([stepLength * (k + 1) / numKnots, 0., 0.]).T * comPercentage + comPos0
+            comTask = np.array([stepLength * (k + 1) / numKnots, 0., 0.]) * comPercentage + comPos0
             footSwingModel += [
                 self.createSwingFootModel(timeStep, supportFootIds, comTask=comTask, swingFootTask=swingFootTask)
             ]
@@ -161,9 +162,9 @@ class SimpleBipedGaitProblem:
         footSwitchModel = self.createFootSwitchModel(supportFootIds, swingFootTask)
 
         # Updating the current foot position for next step
-        comPos0 += np.matrix([stepLength * comPercentage, 0., 0.]).T
+        comPos0 += [stepLength * comPercentage, 0., 0.]
         for p in feetPos0:
-            p += np.matrix([[stepLength, 0., 0.]]).T
+            p += [stepLength, 0., 0.]
         return footSwingModel + [footSwitchModel]
 
     def createSwingFootModel(self, timeStep, supportFootIds, comTask=None, swingFootTask=None):
@@ -181,7 +182,7 @@ class SimpleBipedGaitProblem:
         for i in supportFootIds:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
             supportContactModel = \
-                crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
+                crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.array([0., 0.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
@@ -189,14 +190,20 @@ class SimpleBipedGaitProblem:
         if isinstance(comTask, np.ndarray):
             comTrack = crocoddyl.CostModelCoMPosition(self.state, comTask, self.actuation.nu)
             costModel.addCost("comTrack", comTrack, 1e6)
+        for i in supportFootIds:
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
+                self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e6)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
-        stateReg = crocoddyl.CostModelState(self.state,
-                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+        stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
                                             self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e1)
@@ -205,7 +212,7 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel)
+                                                                     costModel, 0., True)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, timeStep)
         return model
 
@@ -226,7 +233,6 @@ class SimpleBipedGaitProblem:
         """ Action model for pseudo-impulse models.
 
         A pseudo-impulse model consists of adding high-penalty cost for the contact velocities.
-        :param supportFootIds: Ids of the constrained feet
         :param swingFootTask: swinging foot task
         :return pseudo-impulse differential action model
         """
@@ -236,22 +242,28 @@ class SimpleBipedGaitProblem:
         contactModel = crocoddyl.ContactModelMultiple(self.state, self.actuation.nu)
         for i in supportFootIds:
             Mref = crocoddyl.FramePlacement(i, pinocchio.SE3.Identity())
-            supportContactModel = crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.matrix([0., 0.]).T)
+            supportContactModel = crocoddyl.ContactModel6D(self.state, Mref, self.actuation.nu, np.array([0., 0.]))
             contactModel.addContact(self.rmodel.frames[i].name + "_contact", supportContactModel)
 
         # Creating the cost model for a contact phase
         costModel = crocoddyl.CostModelSum(self.state, self.actuation.nu)
+        for i in supportFootIds:
+            cone = crocoddyl.WrenchCone(np.identity(3), self.mu, np.array([0.1, 0.05]))
+            wrenchCone = crocoddyl.CostModelContactWrenchCone(
+                self.state, crocoddyl.ActivationModelQuadraticBarrier(crocoddyl.ActivationBounds(cone.lb, cone.ub)),
+                crocoddyl.FrameWrenchCone(i, cone), self.actuation.nu)
+            costModel.addCost(self.rmodel.frames[i].name + "_wrenchCone", wrenchCone, 1e1)
+
         if swingFootTask is not None:
             for i in swingFootTask:
                 footTrack = crocoddyl.CostModelFramePlacement(self.state, i, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
-                footVel = crocoddyl.FrameMotion(i.frame, pinocchio.Motion.Zero())
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
+                footVel = crocoddyl.FrameMotion(i.id, pinocchio.Motion.Zero())
                 impulseFootVelCost = crocoddyl.CostModelFrameVelocity(self.state, footVel, self.actuation.nu)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_impulseVel", impulseFootVelCost, 1e6)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_impulseVel", impulseFootVelCost, 1e6)
 
         stateWeights = np.array([0] * 3 + [500.] * 3 + [0.01] * (self.state.nv - 6) + [10] * self.state.nv)
-        stateReg = crocoddyl.CostModelState(self.state,
-                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+        stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
                                             self.rmodel.defaultState, self.actuation.nu)
         ctrlReg = crocoddyl.CostModelControl(self.state, self.actuation.nu)
         costModel.addCost("stateReg", stateReg, 1e1)
@@ -260,7 +272,7 @@ class SimpleBipedGaitProblem:
         # Creating the action model for the KKT dynamics with simpletic Euler
         # integration scheme
         dmodel = crocoddyl.DifferentialActionModelContactFwdDynamics(self.state, self.actuation, contactModel,
-                                                                     costModel)
+                                                                     costModel, 0., True)
         model = crocoddyl.IntegratedActionModelEuler(dmodel, 0.)
         return model
 
@@ -282,12 +294,11 @@ class SimpleBipedGaitProblem:
         costModel = crocoddyl.CostModelSum(self.state, 0)
         if swingFootTask is not None:
             for i in swingFootTask:
-                xref = crocoddyl.FrameTranslation(i.frame, i.oMf.translation)
+                xref = crocoddyl.FrameTranslation(i.id, i.oMf.translation)
                 footTrack = crocoddyl.CostModelFrameTranslation(self.state, xref, 0)
-                costModel.addCost(self.rmodel.frames[i.frame].name + "_footTrack", footTrack, 1e8)
+                costModel.addCost(self.rmodel.frames[i.id].name + "_footTrack", footTrack, 1e8)
         stateWeights = np.array([1.] * 6 + [0.1] * (self.rmodel.nv - 6) + [10] * self.rmodel.nv)
-        stateReg = crocoddyl.CostModelState(self.state,
-                                            crocoddyl.ActivationModelWeightedQuad(np.matrix(stateWeights**2).T),
+        stateReg = crocoddyl.CostModelState(self.state, crocoddyl.ActivationModelWeightedQuad(stateWeights**2),
                                             self.rmodel.defaultState, 0)
         costModel.addCost("stateReg", stateReg, 1e1)
 
@@ -297,50 +308,107 @@ class SimpleBipedGaitProblem:
         return model
 
 
-def plotSolution(rmodel, xs, us, figIndex=1, show=True):
+def plotSolution(solver, bounds=True, figIndex=1, figTitle="", show=True):
     import matplotlib.pyplot as plt
+    xs, us = [], []
+    if bounds:
+        us_lb, us_ub = [], []
+        xs_lb, xs_ub = [], []
+    if isinstance(solver, list):
+        rmodel = solver[0].problem.runningModels[0].state.pinocchio
+        for s in solver:
+            xs.extend(s.xs[:-1])
+            us.extend(s.us)
+            if bounds:
+                models = s.problem.runningModels + [s.problem.terminalModel]
+                for m in models:
+                    us_lb += [m.u_lb]
+                    us_ub += [m.u_ub]
+                    xs_lb += [m.state.lb]
+                    xs_ub += [m.state.ub]
+    else:
+        rmodel = solver.problem.runningModels[0].state.pinocchio
+        xs, us = solver.xs, solver.us
+        if bounds:
+            models = s.problem.runningModels + [s.problem.terminalModel]
+            for m in models:
+                us_lb += [m.u_lb]
+                us_ub += [m.u_ub]
+                xs_lb += [m.state.lb]
+                xs_ub += [m.state.ub]
+
     # Getting the state and control trajectories
     nx, nq, nu = xs[0].shape[0], rmodel.nq, us[0].shape[0]
     X = [0.] * nx
     U = [0.] * nu
+    if bounds:
+        U_LB = [0.] * nu
+        U_UB = [0.] * nu
+        X_LB = [0.] * nx
+        X_UB = [0.] * nx
     for i in range(nx):
         X[i] = [np.asscalar(x[i]) for x in xs]
+        if bounds:
+            X_LB[i] = [np.asscalar(x[i]) for x in xs_lb]
+            X_UB[i] = [np.asscalar(x[i]) for x in xs_ub]
     for i in range(nu):
         U[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else 0 for u in us]
+        if bounds:
+            U_LB[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else np.nan for u in us_lb]
+            U_UB[i] = [np.asscalar(u[i]) if u.shape[0] != 0 else np.nan for u in us_ub]
 
     # Plotting the joint positions, velocities and torques
     plt.figure(figIndex)
+    plt.suptitle(figTitle)
     legJointNames = ['1', '2', '3', '4', '5', '6']
     # left foot
     plt.subplot(2, 3, 1)
     plt.title('joint position [rad]')
     [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(7, 13))]
+    if bounds:
+        [plt.plot(X_LB[k], '--r') for i, k in enumerate(range(7, 13))]
+        [plt.plot(X_UB[k], '--r') for i, k in enumerate(range(7, 13))]
     plt.ylabel('LF')
     plt.legend()
     plt.subplot(2, 3, 2)
     plt.title('joint velocity [rad/s]')
     [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(nq + 6, nq + 12))]
+    if bounds:
+        [plt.plot(X_LB[k], '--r') for i, k in enumerate(range(nq + 6, nq + 12))]
+        [plt.plot(X_UB[k], '--r') for i, k in enumerate(range(nq + 6, nq + 12))]
     plt.ylabel('LF')
     plt.legend()
     plt.subplot(2, 3, 3)
     plt.title('joint torque [Nm]')
     [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(0, 6))]
+    if bounds:
+        [plt.plot(U_LB[k], '--r') for i, k in enumerate(range(0, 6))]
+        [plt.plot(U_UB[k], '--r') for i, k in enumerate(range(0, 6))]
     plt.ylabel('LF')
     plt.legend()
 
     # right foot
     plt.subplot(2, 3, 4)
     [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(13, 19))]
+    if bounds:
+        [plt.plot(X_LB[k], '--r') for i, k in enumerate(range(13, 19))]
+        [plt.plot(X_UB[k], '--r') for i, k in enumerate(range(13, 19))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()
     plt.subplot(2, 3, 5)
     [plt.plot(X[k], label=legJointNames[i]) for i, k in enumerate(range(nq + 12, nq + 18))]
+    if bounds:
+        [plt.plot(X_LB[k], '--r') for i, k in enumerate(range(nq + 12, nq + 18))]
+        [plt.plot(X_UB[k], '--r') for i, k in enumerate(range(nq + 12, nq + 18))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()
     plt.subplot(2, 3, 6)
     [plt.plot(U[k], label=legJointNames[i]) for i, k in enumerate(range(6, 12))]
+    if bounds:
+        [plt.plot(U_LB[k], '--r') for i, k in enumerate(range(6, 12))]
+        [plt.plot(U_UB[k], '--r') for i, k in enumerate(range(6, 12))]
     plt.ylabel('RF')
     plt.xlabel('knots')
     plt.legend()

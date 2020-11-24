@@ -23,7 +23,7 @@ SimpleQuadrupedGaitProblem::SimpleQuadrupedGaitProblem(const pinocchio::Model& r
           lh_foot, (pinocchio::FrameType)(pinocchio::JOINT | pinocchio::FIXED_JOINT | pinocchio::BODY))),
       rh_foot_id_(rmodel_.getFrameId(
           rh_foot, (pinocchio::FrameType)(pinocchio::JOINT | pinocchio::FIXED_JOINT | pinocchio::BODY))),
-      state_(boost::make_shared<crocoddyl::StateMultibody>(boost::ref(rmodel_))),
+      state_(boost::make_shared<crocoddyl::StateMultibody>(boost::make_shared<pinocchio::Model>(rmodel_))),
       actuation_(boost::make_shared<crocoddyl::ActuationModelFloatingBase>(state_)),
       firtstep_(true),
       defaultstate_(rmodel_.nq + rmodel_.nv) {
@@ -185,10 +185,10 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->frame, it->oMf.translation());
+      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
       boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
           boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, actuation_->get_nu());
-      cost_model->addCost(rmodel_.frames[it->frame].name + "_footTrack", foot_track, 1e6);
+      cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e6);
     }
   }
   Eigen::VectorXd state_weights(2 * rmodel_.nv);
@@ -243,14 +243,14 @@ boost::shared_ptr<crocoddyl::ActionModelAbstract> SimpleQuadrupedGaitProblem::cr
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->frame, it->oMf.translation());
-      crocoddyl::FrameMotion vref(it->frame, pinocchio::Motion::Zero());
+      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
+      crocoddyl::FrameMotion vref(it->id, pinocchio::Motion::Zero());
       boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
           boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, actuation_->get_nu());
       boost::shared_ptr<crocoddyl::CostModelAbstract> impulse_foot_vel =
           boost::make_shared<crocoddyl::CostModelFrameVelocity>(state_, vref, actuation_->get_nu());
-      cost_model->addCost(rmodel_.frames[it->frame].name + "_footTrack", foot_track, 1e7);
-      cost_model->addCost(rmodel_.frames[it->frame].name + "_impulseVel", impulse_foot_vel, 1e6);
+      cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e7);
+      cost_model->addCost(rmodel_.frames[it->id].name + "_impulseVel", impulse_foot_vel, 1e6);
     }
   }
   Eigen::VectorXd state_weights(2 * rmodel_.nv);
@@ -287,14 +287,14 @@ boost::shared_ptr<ActionModelAbstract> SimpleQuadrupedGaitProblem::createImpulse
   }
 
   // Creating the cost model for a contact phase
-  boost::shared_ptr<crocoddyl::CostModelSum> cost_model = boost::make_shared<crocoddyl::CostModelSum>(state_, 0, true);
+  boost::shared_ptr<crocoddyl::CostModelSum> cost_model = boost::make_shared<crocoddyl::CostModelSum>(state_, 0);
   if (!foot_swing_task.empty()) {
     for (std::vector<crocoddyl::FramePlacement>::const_iterator it = foot_swing_task.begin();
          it != foot_swing_task.end(); ++it) {
-      crocoddyl::FrameTranslation xref(it->frame, it->oMf.translation());
+      crocoddyl::FrameTranslation xref(it->id, it->placement.translation());
       boost::shared_ptr<crocoddyl::CostModelAbstract> foot_track =
           boost::make_shared<crocoddyl::CostModelFrameTranslation>(state_, xref, 0);
-      cost_model->addCost(rmodel_.frames[it->frame].name + "_footTrack", foot_track, 1e7);
+      cost_model->addCost(rmodel_.frames[it->id].name + "_footTrack", foot_track, 1e7);
     }
   }
   Eigen::VectorXd state_weights(2 * rmodel_.nv);

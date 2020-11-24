@@ -7,9 +7,7 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import Contact3DDerived, Contact6DDerived
-
-pinocchio.switchToNumpyMatrix()
+from crocoddyl.utils import Contact3DModelDerived, Contact6DModelDerived
 
 
 class ContactModelAbstractTestCase(unittest.TestCase):
@@ -45,8 +43,10 @@ class ContactModelAbstractTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Run calc for both action models
-        self.CONTACT.calcDiff(self.data, self.x, True)
-        self.CONTACT_DER.calcDiff(self.data_der, self.x, True)
+        self.CONTACT.calc(self.data, self.x)
+        self.CONTACT.calcDiff(self.data, self.x)
+        self.CONTACT_DER.calc(self.data_der, self.x)
+        self.CONTACT_DER.calcDiff(self.data_der, self.x)
         # Checking the Jacobians of the contact constraint
         self.assertTrue(np.allclose(self.data.da0_dx, self.data_der.da0_dx, atol=1e-9),
                         "Wrong derivatives of the desired contact acceleration (da0_dx).")
@@ -87,15 +87,17 @@ class ContactModelMultipleAbstractTestCase(unittest.TestCase):
         self.contactSum.calc(self.dataSum, self.x)
         # Checking the cost value and its residual
         Jc = np.vstack([data.Jc for data in self.datas.values()])
-        a0 = np.vstack([data.a0 for data in self.datas.values()])
+        a0 = np.hstack([data.a0 for data in self.datas.values()])
         self.assertTrue(np.allclose(self.dataSum.Jc, Jc, atol=1e-9), "Wrong contact Jacobian (Jc).")
         self.assertTrue(np.allclose(self.dataSum.a0, a0, atol=1e-9), "Wrong drift acceleration (a0).")
 
     def test_calcDiff(self):
         # Run calc for both action models
         for contact, data in zip(self.CONTACTS.values(), self.datas.values()):
-            contact.calcDiff(data, self.x, True)
-        self.contactSum.calcDiff(self.dataSum, self.x, True)
+            contact.calc(data, self.x)
+            contact.calcDiff(data, self.x)
+        self.contactSum.calc(self.dataSum, self.x)
+        self.contactSum.calcDiff(self.dataSum, self.x)
         # Checking the Jacobians of the contact constraint
         da0_dx = np.vstack([data.da0_dx for data in self.datas.values()])
         self.assertTrue(np.allclose(self.dataSum.da0_dx, da0_dx, atol=1e-9),
@@ -109,7 +111,7 @@ class Contact3DTest(ContactModelAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     xref = crocoddyl.FrameTranslation(ROBOT_MODEL.getFrameId('lf_foot'), pinocchio.SE3.Random().translation)
     CONTACT = crocoddyl.ContactModel3D(ROBOT_STATE, xref, gains)
-    CONTACT_DER = Contact3DDerived(ROBOT_STATE, xref, gains)
+    CONTACT_DER = Contact3DModelDerived(ROBOT_STATE, xref, gains)
 
 
 class Contact3DMultipleTest(ContactModelMultipleAbstractTestCase):
@@ -139,7 +141,7 @@ class Contact6DTest(ContactModelAbstractTestCase):
     gains = pinocchio.utils.rand(2)
     Mref = crocoddyl.FramePlacement(ROBOT_MODEL.getFrameId('r_sole'), pinocchio.SE3.Random())
     CONTACT = crocoddyl.ContactModel6D(ROBOT_STATE, Mref, gains)
-    CONTACT_DER = Contact6DDerived(ROBOT_STATE, Mref, gains)
+    CONTACT_DER = Contact6DModelDerived(ROBOT_STATE, Mref, gains)
 
 
 class Contact6DMultipleTest(ContactModelMultipleAbstractTestCase):

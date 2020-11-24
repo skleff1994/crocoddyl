@@ -7,9 +7,7 @@ import numpy as np
 
 import crocoddyl
 import pinocchio
-from crocoddyl.utils import DifferentialFreeFwdDynamicsDerived, UnicycleDerived
-
-pinocchio.switchToNumpyMatrix()
+from crocoddyl.utils import DifferentialFreeFwdDynamicsModelDerived, UnicycleModelDerived
 
 
 class ShootingProblemTestCase(unittest.TestCase):
@@ -22,7 +20,7 @@ class ShootingProblemTestCase(unittest.TestCase):
         self.xs = []
         self.us = []
         self.xs.append(state.rand())
-        for i in range(self.T):
+        for _ in range(self.T):
             self.xs.append(state.rand())
             self.us.append(np.matrix(np.random.rand(self.MODEL.nu)).T)
         self.PROBLEM = crocoddyl.ShootingProblem(self.xs[0], [self.MODEL] * self.T, self.MODEL)
@@ -41,6 +39,9 @@ class ShootingProblemTestCase(unittest.TestCase):
 
     def test_calcDiff(self):
         # Running calc functions
+        cost = self.PROBLEM.calc(self.xs, self.us)
+        costDer = self.PROBLEM_DER.calc(self.xs, self.us)
+
         cost = self.PROBLEM.calcDiff(self.xs, self.us)
         costDer = self.PROBLEM_DER.calcDiff(self.xs, self.us)
         self.assertAlmostEqual(cost, costDer, 10, "Wrong cost value")
@@ -63,7 +64,7 @@ class ShootingProblemTestCase(unittest.TestCase):
 
 class UnicycleShootingTest(ShootingProblemTestCase):
     MODEL = crocoddyl.ActionModelUnicycle()
-    MODEL_DER = UnicycleDerived()
+    MODEL_DER = UnicycleModelDerived()
 
 
 class TalosArmShootingTest(ShootingProblemTestCase):
@@ -79,7 +80,7 @@ class TalosArmShootingTest(ShootingProblemTestCase):
     COST_SUM.addCost("xReg", crocoddyl.CostModelState(STATE), 1e-7)
     COST_SUM.addCost("uReg", crocoddyl.CostModelControl(STATE), 1e-7)
     DIFF_MODEL = crocoddyl.DifferentialActionModelFreeFwdDynamics(STATE, ACTUATION, COST_SUM)
-    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsDerived(STATE, ACTUATION, COST_SUM)
+    DIFF_MODEL_DER = DifferentialFreeFwdDynamicsModelDerived(STATE, ACTUATION, COST_SUM)
     MODEL = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL, 1e-3)
     MODEL_DER = crocoddyl.IntegratedActionModelEuler(DIFF_MODEL_DER, 1e-3)
 

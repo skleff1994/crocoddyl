@@ -11,8 +11,6 @@ from crocoddyl.utils.quadruped import SimpleQuadrupedalGaitProblem, plotSolution
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-crocoddyl.switchToNumpyMatrix()
-
 # Loading the anymal model
 anymal = example_robot_data.loadANYmal()
 
@@ -118,8 +116,8 @@ for i, phase in enumerate(GAITPHASES):
         ddp[i].setCallbacks([crocoddyl.CallbackVerbose()])
 
     # Solving the problem with the DDP solver
-    xs = [anymal.model.defaultState] * len(ddp[i].models())
-    us = [m.quasiStatic(d, anymal.model.defaultState) for m, d in list(zip(ddp[i].models(), ddp[i].datas()))[:-1]]
+    xs = [anymal.model.defaultState] * (ddp[i].problem.T + 1)
+    us = ddp[i].problem.quasiStatic([anymal.model.defaultState] * ddp[i].problem.T)
     ddp[i].solve(xs, us, 100, False, 0.1)
 
     # Defining the final state as initial one for the next phase
@@ -133,22 +131,17 @@ if WITHDISPLAY:
 
 # Plotting the entire motion
 if WITHPLOT:
-    xs = []
-    us = []
-    for i, phase in enumerate(GAITPHASES):
-        xs.extend(ddp[i].xs[:-1])
-        us.extend(ddp[i].us)
     log = ddp[0].getCallbacks()[0]
-    plotSolution(anymal.model, xs, us, figIndex=1, show=False)
+    plotSolution(ddp, figIndex=1, show=False)
 
     for i, phase in enumerate(GAITPHASES):
-        title = phase.keys()[0] + " (phase " + str(i) + ")"
+        title = list(phase.keys())[0] + " (phase " + str(i) + ")"
         log = ddp[i].getCallbacks()[0]
         crocoddyl.plotConvergence(log.costs,
-                                  log.control_regs,
-                                  log.state_regs,
-                                  log.gm_stops,
-                                  log.th_stops,
+                                  log.u_regs,
+                                  log.x_regs,
+                                  log.grads,
+                                  log.stops,
                                   log.steps,
                                   figTitle=title,
                                   figIndex=i + 3,

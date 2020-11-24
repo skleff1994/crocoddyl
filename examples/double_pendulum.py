@@ -9,8 +9,6 @@ from crocoddyl.utils.pendulum import CostModelDoublePendulum, ActuationModelDoub
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-crocoddyl.switchToNumpyMatrix()
-
 # Loading the double pendulum model
 robot = example_robot_data.loadDoublePendulum()
 robot_model = robot.model
@@ -23,7 +21,7 @@ runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 xRegCost = crocoddyl.CostModelState(state, crocoddyl.ActivationModelQuad(state.ndx), state.zero(), actModel.nu)
 uRegCost = crocoddyl.CostModelControl(state, crocoddyl.ActivationModelQuad(1), actModel.nu)
-xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(np.matrix(weights).T), actModel.nu)
+xPendCost = CostModelDoublePendulum(state, crocoddyl.ActivationModelWeightedQuad(weights), actModel.nu)
 
 dt = 1e-2
 
@@ -38,8 +36,8 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the FDDP solver
 T = 100
-x0 = [3.14, 0, 0., 0.]
-problem = crocoddyl.ShootingProblem(np.matrix(x0).T, [runningModel] * T, terminalModel)
+x0 = np.array([3.14, 0, 0., 0.])
+problem = crocoddyl.ShootingProblem(x0, [runningModel] * T, terminalModel)
 fddp = crocoddyl.SolverFDDP(problem)
 
 cameraTF = [1.4, 0., 0.2, 0.5, 0.5, 0.5, 0.5]
@@ -61,13 +59,7 @@ fddp.solve()
 if WITHPLOT:
     log = fddp.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-    crocoddyl.plotConvergence(log.costs,
-                              log.control_regs,
-                              log.state_regs,
-                              log.gm_stops,
-                              log.th_stops,
-                              log.steps,
-                              figIndex=2)
+    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.grads, log.stops, log.steps, figIndex=2)
 
 # Display the entire motion
 if WITHDISPLAY:

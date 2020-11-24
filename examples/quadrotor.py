@@ -5,12 +5,9 @@ import crocoddyl
 import pinocchio
 import numpy as np
 import example_robot_data
-from crocoddyl.utils.quadrotor import ActuationModelUAM
 
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
-
-crocoddyl.switchToNumpyMatrix()
 
 hector = example_robot_data.loadHector()
 robot_model = hector.model
@@ -19,22 +16,23 @@ target_pos = np.array([1, 0, 1])
 target_quat = pinocchio.Quaternion(1, 0, 0, 0)
 
 state = crocoddyl.StateMultibody(robot_model)
-distance_rotor_COG = 0.1525
+d_cog = 0.1525
 cf = 6.6e-5
 cm = 1e-6
 u_lim = 5
 l_lim = 0.1
-actModel = ActuationModelUAM(state, '+', distance_rotor_COG, cm, cf, u_lim, l_lim)
+tau_f = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
+                  [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
+
+actModel = crocoddyl.ActuationModelMultiCopterBase(state, 4, tau_f)
 
 runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 
 # Needed objects to create the costs
-Mref = crocoddyl.FramePlacement(robot_model.getFrameId("base_link"),
-                                pinocchio.SE3(target_quat.matrix(),
-                                              np.matrix(target_pos).T))
-wBasePos, wBaseOri, wBaseVel, wBaseRate = [0.1], [1000], [1000], [10]
-stateWeights = np.matrix([wBasePos * 3 + wBaseOri * 3 + wBaseVel * robot_model.nv]).T
+Mref = crocoddyl.FramePlacement(robot_model.getFrameId("base_link"), pinocchio.SE3(target_quat.matrix(), target_pos))
+wBasePos, wBaseOri, wBaseVel = 0.1, 1000, 1000
+stateWeights = np.array([wBasePos] * 3 + [wBaseOri] * 3 + [wBaseVel] * robot_model.nv)
 
 # Costs
 goalTrackingCost = crocoddyl.CostModelFramePlacement(state, Mref, actModel.nu)
@@ -54,8 +52,7 @@ terminalModel = crocoddyl.IntegratedActionModelEuler(
 
 # Creating the shooting problem and the FDDP solver
 T = 33
-problem = crocoddyl.ShootingProblem(np.vstack([hector.q0, pinocchio.utils.zero((state.nv))]), [runningModel] * T,
-                                    terminalModel)
+problem = crocoddyl.ShootingProblem(np.concatenate([hector.q0, np.zeros(state.nv)]), [runningModel] * T, terminalModel)
 fddp = crocoddyl.SolverFDDP(problem)
 
 fddp.setCallbacks([crocoddyl.CallbackLogger(), crocoddyl.CallbackVerbose()])
@@ -79,13 +76,7 @@ fddp.solve()
 if WITHPLOT:
     log = fddp.getCallbacks()[0]
     crocoddyl.plotOCSolution(log.xs, log.us, figIndex=1, show=False)
-    crocoddyl.plotConvergence(log.costs,
-                              log.control_regs,
-                              log.state_regs,
-                              log.gm_stops,
-                              log.th_stops,
-                              log.steps,
-                              figIndex=2)
+    crocoddyl.plotConvergence(log.costs, log.u_regs, log.x_regs, log.stops, log.grads, log.steps, figIndex=2)
 
 # Display the entire motion
 if WITHDISPLAY:

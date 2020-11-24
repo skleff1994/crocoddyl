@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
+// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,53 +9,92 @@
 #ifndef CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 #define CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/impulse-base.hpp"
+
 #include <pinocchio/spatial/motion.hpp>
 #include <pinocchio/multibody/data.hpp>
 
 namespace crocoddyl {
 
-class ImpulseModel3D : public ImpulseModelAbstract {
+template <typename _Scalar>
+class ImpulseModel3DTpl : public ImpulseModelAbstractTpl<_Scalar> {
  public:
-  ImpulseModel3D(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
-  ~ImpulseModel3D();
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x);
-  void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const Eigen::VectorXd>& x,
-                const bool& recalc = true);
-  void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::VectorXd& force);
-  boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::Data* const data);
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ImpulseModelAbstractTpl<Scalar> Base;
+  typedef ImpulseData3DTpl<Scalar> Data;
+  typedef StateMultibodyTpl<Scalar> StateMultibody;
+  typedef ImpulseDataAbstractTpl<Scalar> ImpulseDataAbstract;
+  typedef typename MathBase::Vector2s Vector2s;
+  typedef typename MathBase::Vector3s Vector3s;
+  typedef typename MathBase::VectorXs VectorXs;
+  typedef typename MathBase::MatrixXs MatrixXs;
+
+  ImpulseModel3DTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& frame);
+  virtual ~ImpulseModel3DTpl();
+
+  virtual void calc(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void calcDiff(const boost::shared_ptr<ImpulseDataAbstract>& data, const Eigen::Ref<const VectorXs>& x);
+  virtual void updateForce(const boost::shared_ptr<ImpulseDataAbstract>& data, const VectorXs& force);
+  virtual boost::shared_ptr<ImpulseDataAbstract> createData(pinocchio::DataTpl<Scalar>* const data);
 
   const std::size_t& get_frame() const;
+
+ protected:
+  using Base::ni_;
+  using Base::state_;
 
  private:
   std::size_t frame_;
 };
 
-struct ImpulseData3D : public ImpulseDataAbstract {
+template <typename _Scalar>
+struct ImpulseData3DTpl : public ImpulseDataAbstractTpl<_Scalar> {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-  template <typename Model>
-  ImpulseData3D(Model* const model, pinocchio::Data* const data)
-      : ImpulseDataAbstract(model, data),
-        jMf(model->get_state()->get_pinocchio().frames[model->get_frame()].placement),
-        fXj(jMf.inverse().toActionMatrix()),
+  typedef _Scalar Scalar;
+  typedef MathBaseTpl<Scalar> MathBase;
+  typedef ImpulseDataAbstractTpl<Scalar> Base;
+  typedef typename MathBase::Matrix6xs Matrix6xs;
+
+  template <template <typename Scalar> class Model>
+  ImpulseData3DTpl(Model<Scalar>* const model, pinocchio::DataTpl<Scalar>* const data)
+      : Base(model, data),
         fJf(6, model->get_state()->get_nv()),
         v_partial_dq(6, model->get_state()->get_nv()),
         v_partial_dv(6, model->get_state()->get_nv()) {
-    joint = model->get_state()->get_pinocchio().frames[model->get_frame()].parent;
-    fJf.fill(0);
-    v_partial_dq.fill(0);
-    v_partial_dv.fill(0);
+    frame = model->get_frame();
+    joint = model->get_state()->get_pinocchio()->frames[frame].parent;
+    jMf = model->get_state()->get_pinocchio()->frames[model->get_frame()].placement;
+    fXj = jMf.inverse().toActionMatrix();
+    fJf.setZero();
+    v_partial_dq.setZero();
+    v_partial_dv.setZero();
   }
 
-  pinocchio::SE3 jMf;
-  pinocchio::SE3::ActionMatrixType fXj;
-  pinocchio::Data::Matrix6x fJf;
-  pinocchio::Data::Matrix6x v_partial_dq;
-  pinocchio::Data::Matrix6x v_partial_dv;
+  using Base::df_dx;
+  using Base::dv0_dq;
+  using Base::f;
+  using Base::frame;
+  using Base::Jc;
+  using Base::jMf;
+  using Base::joint;
+  using Base::pinocchio;
+
+  typename pinocchio::SE3Tpl<Scalar>::ActionMatrixType fXj;
+  Matrix6xs fJf;
+  Matrix6xs v_partial_dq;
+  Matrix6xs v_partial_dv;
 };
 
 }  // namespace crocoddyl
+
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+/* --- Details -------------------------------------------------------------- */
+#include "crocoddyl/multibody/impulses/impulse-3d.hxx"
 
 #endif  // CROCODDYL_MULTIBODY_IMPULSES_IMPULSE_3D_HPP_

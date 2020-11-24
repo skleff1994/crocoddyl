@@ -16,6 +16,7 @@
 #include <pinocchio/algorithm/center-of-mass.hpp>
 #include <pinocchio/algorithm/kinematics.hpp>
 
+#include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/multibody/actions/contact-fwddyn.hpp"
 #include "crocoddyl/multibody/actions/impulse-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
@@ -56,7 +57,7 @@ class SimpleQuadrupedGaitProblem {
 
   boost::shared_ptr<ActionModelAbstract> createFootSwitchModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask,
-      bool pseudoImpulse = true);
+      bool pseudoImpulse = false);
 
   boost::shared_ptr<ActionModelAbstract> createPseudoImpulseModel(
       const std::vector<pinocchio::FrameIndex>& supportFootIds, const std::vector<FramePlacement>& swingFootTask);
