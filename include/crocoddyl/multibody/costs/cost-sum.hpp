@@ -6,11 +6,11 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
-#define CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
+#ifndef CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
+#define CROCODDYL_MULTIBODY_COSTS_COST_SUM_HPP_
 
 #include "crocoddyl/core/utils/deprecate.hpp"
-CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/numdiff/cost-sum.hpp", "crocoddyl/core/numdiff/cost-sum.hpp")
-#include "crocoddyl/core/numdiff/cost.hpp"
+CROCODDYL_PRAGMA_DEPRECATED_HEADER("crocoddyl/multibody/costs/cost-sum.hpp", "crocoddyl/core/costs/cost-sum.hpp")
+#include "crocoddyl/core/costs/cost-sum.hpp"
 
-#endif  // CROCODDYL_MULTIBODY_NUMDIFF_COST_HPP_
+#endif
