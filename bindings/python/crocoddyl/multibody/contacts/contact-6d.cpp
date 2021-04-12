@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -42,6 +42,7 @@ void exposeContact6D() {
            "Compute the derivatives of the 6D contact holonomic constraint.\n\n"
            "The rigid contact model throught acceleration-base holonomic constraint\n"
            "of the contact frame placement.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n")
       .def("updateForce", &ContactModel6D::updateForce, bp::args("self", "data", "force"),

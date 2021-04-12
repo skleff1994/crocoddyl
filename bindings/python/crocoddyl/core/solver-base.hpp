@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ class SolverAbstract_wrap : public SolverAbstract, public bp::wrapper<SolverAbst
     return bp::call<void>(this->get_override("computeDirection").ptr(), recalc);
   }
 
-  double tryStep(const double& step_length) {
+  double tryStep(const double& step_length = 1) {
     return bp::call<double>(this->get_override("tryStep").ptr(), step_length);
   }
 

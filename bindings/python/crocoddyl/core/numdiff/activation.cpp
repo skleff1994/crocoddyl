@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2019-2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@ void exposeActivationNumDiff() {
       .def("calcDiff", &ActivationModelNumDiff::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of the residual.\n\n"
            "It computes the Jacobian and Hessian using numerical differentiation.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: NumDiff action data\n"
            ":param r: residual vector\n")
       .def("createData", &ActivationModelNumDiff::createData, bp::args("self"),

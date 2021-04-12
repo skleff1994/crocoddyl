@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -189,7 +189,7 @@ class SolverDDP : public SolverAbstract {
    * @brief Return the threshold for accepting a gap as non-zero
    */
   const double& get_th_gaptol() const;
-  
+
   /**
    * @brief Return the Hessian of the Value function \f$V_{\mathbf{xx}_s}\f$
    */
@@ -279,7 +279,7 @@ class SolverDDP : public SolverAbstract {
    * @brief Modify the threshold for accepting a gap as non-zero
    */
   void set_th_gaptol(const double& th_gaptol);
-  
+
  protected:
   double regfactor_;  //!< Regularization factor used to decrease / increase it
   double regmin_;     //!< Minimum allowed regularization value

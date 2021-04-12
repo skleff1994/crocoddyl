@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2020, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,7 @@ void exposeSquashingAbstract() {
            ":param s: squashing input")
       .def("calcDiff", pure_virtual(&SquashingModelAbstract_wrap::calcDiff), bp::args("self", "data", "s"),
            "Compute the derivative of the squashing function.\n\n"
+           "It assumes that calc has been run first.\n"
            ":param data: squashing data\n"
            ":param u: squashing input")
       .def("createData", &SquashingModelAbstract_wrap::createData, bp::args("self"), "Create the squashing data.\n\n")

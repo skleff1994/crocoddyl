@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, IRI: CSIC-UPC
+// Copyright (C) 2019-2020, LAAS-CNRS, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -140,12 +140,12 @@ void IntegratedActionModelRK4Tpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
 
       d->Lxx_partialx[i].noalias() = d->differential[i]->Lxx * d->dyi_dx[i];
       d->ddli_ddx[i].noalias() = d->dyi_dx[i].transpose() * d->Lxx_partialx[i];
-      
+
       d->Luu_partialx[i].noalias() = d->differential[i]->Lxu.transpose() * d->dyi_du[i];
       d->Lxx_partialu[i].noalias() = d->differential[i]->Lxx * d->dyi_du[i];
       d->ddli_ddu[i].noalias() = d->differential[i]->Luu + d->Luu_partialx[i].transpose() + d->Luu_partialx[i] +
-                       d->dyi_du[i].transpose() * d->Lxx_partialu[i];
-      
+                                 d->dyi_du[i].transpose() * d->Lxx_partialu[i];
+
       d->ddli_dxdu[i].noalias() = d->dyi_dx[i].transpose() * d->differential[i]->Lxu;
       d->ddli_dxdu[i].noalias() += d->dyi_dx[i].transpose() * d->Lxx_partialu[i];
     }

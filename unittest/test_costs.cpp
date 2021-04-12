@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, New York University, Max Planck Gesellschaft
-//                          University of Edinburgh, INRIA,
+// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
+//                          Max Planck Gesellschaft, University of Edinburgh,
+//                          INRIA
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,7 +29,9 @@ void test_calc_returns_a_cost(CostModelTypes::Type cost_type, StateModelTypes::T
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  pinocchio::Model& pinocchio_model = *model->get_state()->get_pinocchio().get();
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
@@ -56,7 +59,9 @@ void test_calc_against_numdiff(CostModelTypes::Type cost_type, StateModelTypes::
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  pinocchio::Model& pinocchio_model = *model->get_state()->get_pinocchio().get();
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
@@ -89,7 +94,9 @@ void test_partial_derivatives_against_numdiff(CostModelTypes::Type cost_type, St
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  pinocchio::Model& pinocchio_model = *model->get_state()->get_pinocchio().get();
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
+  pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
   const boost::shared_ptr<crocoddyl::CostDataAbstract>& data = model->createData(&shared_data);
@@ -143,7 +150,8 @@ void test_dimensions_in_cost_sum(CostModelTypes::Type cost_type, StateModelTypes
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state = model->get_state();
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);
@@ -174,7 +182,8 @@ void test_partial_derivatives_in_cost_sum(CostModelTypes::Type cost_type, StateM
       factory.create(cost_type, state_type, activation_type);
 
   // create the corresponding data object
-  const boost::shared_ptr<crocoddyl::StateMultibody>& state = model->get_state();
+  const boost::shared_ptr<crocoddyl::StateMultibody>& state =
+      boost::static_pointer_cast<crocoddyl::StateMultibody>(model->get_state());
   pinocchio::Model& pinocchio_model = *state->get_pinocchio().get();
   pinocchio::Data pinocchio_data(pinocchio_model);
   crocoddyl::DataCollectorMultibody shared_data(&pinocchio_data);

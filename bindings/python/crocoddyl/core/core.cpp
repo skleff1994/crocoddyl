@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,6 +24,9 @@ void exposeCore() {
   exposeDataCollectorActuation();
   exposeIntegratedActionEuler();
   exposeIntegratedActionRK4();
+  exposeCostAbstract();
+  exposeCostSum();
+  exposeCostControl();
   exposeActionNumDiff();
   exposeDifferentialActionNumDiff();
   exposeActivationNumDiff();
@@ -34,10 +37,13 @@ void exposeCore() {
   exposeActionLQR();
   exposeDifferentialActionLQR();
   exposeActivationQuad();
+  exposeActivationQuadFlatExp();
+  exposeActivationQuadFlatLog();
   exposeActivationWeightedQuad();
   exposeActivationQuadraticBarrier();
   exposeActivationWeightedQuadraticBarrier();
-  exposeActivationSmoothAbs();
+  exposeActivationSmooth1Norm();
+  exposeActivationSmooth2Norm();
   exposeSolverKKT();
   exposeSolverDDP();
   exposeSolverFDDP();

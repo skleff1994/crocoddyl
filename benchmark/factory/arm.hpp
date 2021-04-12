@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh, LAAS-CNRS
+// Copyright (C) 2019-2020, University of Edinburgh, LAAS-CNRS
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -19,10 +19,10 @@
 #include "crocoddyl/multibody/actuations/full.hpp"
 #include "crocoddyl/multibody/actions/free-fwddyn.hpp"
 #include "crocoddyl/core/integrator/euler.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/core/costs/control.hpp"
 
 namespace crocoddyl {
 namespace benchmark {

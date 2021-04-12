@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,8 +29,8 @@ void exposeActuationModelMultiCopterBase() {
            ":param u: control input")
       .def("calcDiff", &ActuationModelMultiCopterBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
-           "It computes the partial derivatives of the full actuation. It assumes that you\n"
-           "create the data using this class. The reason is that the derivatives are constant and\n"
+           "It computes the partial derivatives of the full actuation. It assumes that calc\n"
+           "has been run first. The reason is that the derivatives are constant and\n"
            "defined in createData. The Hessian is constant, so we don't write again this value.\n"
            ":param data: multicopter-base actuation data\n"
            ":param x: state vector\n"

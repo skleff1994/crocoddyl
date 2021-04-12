@@ -1,8 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2019, LAAS-CNRS
-// Copyright (C) 2020, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,8 +81,8 @@ void SolverAbstract::setCandidate(const std::vector<Eigen::VectorXd>& xs_warm,
     for (std::size_t t = 0; t < T; ++t) {
       if (static_cast<std::size_t>(us_warm[t].size()) > nu) {
         throw_pretty("Invalid argument: "
-                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " + std::to_string(nu) +
-                            ")");
+                     << "us_init[" + std::to_string(t) + "] has wrong dimension (it should be lower than " +
+                            std::to_string(nu) + ")");
       }
     }
     std::copy(us_warm.begin(), us_warm.end(), us_.begin());

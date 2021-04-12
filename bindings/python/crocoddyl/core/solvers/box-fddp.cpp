@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, University of Edinburgh
+// Copyright (C) 2019-2020, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,8 @@ namespace crocoddyl {
 namespace python {
 
 void exposeSolverBoxFDDP() {
+  bp::register_ptr_to_python<boost::shared_ptr<SolverBoxFDDP> >();
+
   bp::class_<SolverBoxFDDP, bp::bases<SolverFDDP> >(
       "SolverBoxFDDP",
       "Box-constrained FDDP solver.\n\n"

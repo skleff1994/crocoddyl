@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -9,23 +9,23 @@
 namespace crocoddyl {
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation,
                                                    const std::size_t& nu)
     : state_(state), activation_(activation), nu_(nu), unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state,
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state,
                                                    boost::shared_ptr<ActivationModelAbstract> activation)
     : state_(state), activation_(activation), nu_(state->get_nv()), unone_(VectorXs::Zero(state->get_nv())) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr,
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr,
                                                    const std::size_t& nu)
     : state_(state), activation_(boost::make_shared<ActivationModelQuad>(nr)), nu_(nu), unone_(VectorXs::Zero(nu)) {}
 
 template <typename Scalar>
-CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateMultibody> state, const std::size_t& nr)
+CostModelAbstractTpl<Scalar>::CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr)
     : state_(state),
       activation_(boost::make_shared<ActivationModelQuad>(nr)),
       nu_(state->get_nv()),
@@ -53,7 +53,7 @@ boost::shared_ptr<CostDataAbstractTpl<Scalar> > CostModelAbstractTpl<Scalar>::cr
 }
 
 template <typename Scalar>
-const boost::shared_ptr<StateMultibodyTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_state() const {
+const boost::shared_ptr<StateAbstractTpl<Scalar> >& CostModelAbstractTpl<Scalar>::get_state() const {
   return state_;
 }
 

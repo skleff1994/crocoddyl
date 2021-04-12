@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,10 +22,8 @@ void exposeStateMultibody();
 void exposeActuationFloatingBase();
 void exposeActuationFull();
 void exposeActuationModelMultiCopterBase();
-void exposeCostAbstract();
 void exposeContactAbstract();
 void exposeImpulseAbstract();
-void exposeCostSum();
 void exposeContactMultiple();
 void exposeImpulseMultiple();
 void exposeDataCollectorMultibody();
@@ -35,7 +33,6 @@ void exposeDifferentialActionFreeFwdDynamics();
 void exposeDifferentialActionContactFwdDynamics();
 void exposeActionImpulseFwdDynamics();
 void exposeCostState();
-void exposeCostControl();
 void exposeCostCoMPosition();
 void exposeCostCentroidalMomentum();
 void exposeCostFramePlacement();

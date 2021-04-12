@@ -6,6 +6,9 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
+#define BOOST_TEST_NO_MAIN
+#define BOOST_TEST_ALTERNATIVE_INIT_API
+
 #include <boost/random.hpp>
 #include "crocoddyl/core/solvers/box-qp.hpp"
 #include "unittest_common.hpp"
@@ -57,7 +60,7 @@ void test_unconstrained_qp() {
   boxqp.set_reg(0.);
 
   Eigen::MatrixXd H = Eigen::MatrixXd::Random(nx, nx);
-  Eigen::MatrixXd hessian = H.transpose() * H;
+  Eigen::MatrixXd hessian = H.transpose() * H + nx * Eigen::MatrixXd::Identity(nx, nx);
   hessian = 0.5 * (hessian + hessian.transpose()).eval();
   Eigen::VectorXd gradient = Eigen::VectorXd::Random(nx);
   Eigen::VectorXd lb = -std::numeric_limits<double>::infinity() * Eigen::VectorXd::Ones(nx);

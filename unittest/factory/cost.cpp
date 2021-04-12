@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cost.hpp"
 #include "crocoddyl/multibody/costs/state.hpp"
-#include "crocoddyl/multibody/costs/control.hpp"
+#include "crocoddyl/core/costs/control.hpp"
 #include "crocoddyl/multibody/costs/com-position.hpp"
 // #include "crocoddyl/multibody/costs/centroidal-momentum.hpp"
 #include "crocoddyl/multibody/costs/frame-placement.hpp"
@@ -17,7 +17,7 @@
 #include "crocoddyl/multibody/costs/frame-velocity.hpp"
 #include "crocoddyl/multibody/costs/contact-friction-cone.hpp"
 #include "crocoddyl/multibody/costs/contact-wrench-cone.hpp"
-#include "crocoddyl/multibody/costs/cost-sum.hpp"
+#include "crocoddyl/core/costs/cost-sum.hpp"
 #include "crocoddyl/core/utils/exception.hpp"
 
 namespace crocoddyl {

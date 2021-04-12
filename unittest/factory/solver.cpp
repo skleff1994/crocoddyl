@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, New York University,
+// Copyright (C) 2019-2020, LAAS-CNRS, New York University,
 //                          Max Planck Gesellschaft, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
@@ -54,7 +54,16 @@ boost::shared_ptr<crocoddyl::SolverAbstract> SolverFactory::create(SolverTypes::
                                                                    size_t T) const {
   boost::shared_ptr<crocoddyl::SolverAbstract> solver;
   boost::shared_ptr<crocoddyl::ActionModelAbstract> model = ActionModelFactory().create(action_type);
-  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models(T, model);
+  boost::shared_ptr<crocoddyl::ActionModelAbstract> model2 = ActionModelFactory().create(action_type, true);
+  std::vector<boost::shared_ptr<crocoddyl::ActionModelAbstract> > running_models;
+  const size_t halfway = T / 2;
+  for (size_t i = 0; i < halfway; ++i) {
+    running_models.push_back(model);
+  }
+  for (size_t i = 0; i < T - halfway; ++i) {
+    running_models.push_back(model2);
+  }
+
   boost::shared_ptr<crocoddyl::ShootingProblem> problem =
       boost::make_shared<crocoddyl::ShootingProblem>(model->get_state()->zero(), running_models, model);
 

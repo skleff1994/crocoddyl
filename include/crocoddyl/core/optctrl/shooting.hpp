@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -148,7 +148,7 @@ class ShootingProblemTpl {
   /**
    * @brief Update the model and data for a specific node
    *
-   * @param[in] i      node index \f$(0\leq i \leq T+1)\f$
+   * @param[in] i      node index \f$(0\leq i \lt T+1)\f$
    * @param[in] model  action model
    * @param[in] data   action data
    */
@@ -158,7 +158,7 @@ class ShootingProblemTpl {
   /**
    * @brief Update a model and allocated new data for a specific node
    *
-   * @param[in] i      node index \f$(0\leq i \leq T+1)\f$
+   * @param[in] i      node index \f$(0\leq i \lt T+1)\f$
    * @param[in] model  action model
    */
   void updateModel(std::size_t i, boost::shared_ptr<ActionModelAbstract> model);
