@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ void exposeActivationSmooth1Norm() {
            ":param r: residual vector")
       .def("calcDiff", &ActivationModelSmooth1Norm::calcDiff, bp::args("self", "data", "r"),
            "Compute the derivatives of a smooth-abs function.\n\n"
+           "It assumes that calc has been run first.\n"
            ":param data: activation data\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelSmooth1Norm::createData, bp::args("self"),

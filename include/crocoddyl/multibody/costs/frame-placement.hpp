@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace crocoddyl {
  * @brief Frame placement cost
  *
  * This cost function defines a residual vector as \f$\mathbf{r}=\mathbf{p}\ominus\mathbf{p}^*\f$, where
- * \f$\mathbf{p},\mathbf{p}^*\in~\mathbb{SE(3)}\f$ are the current and reference frame placements, respetively. Note
+ * \f$\mathbf{p},\mathbf{p}^*\in~\mathbb{SE(3)}\f$ are the current and reference frame placements, respectively. Note
  * that the dimension of the residual vector is 6.
  *
  * Both cost and residual derivatives are computed analytically.
@@ -47,11 +47,9 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef FramePlacementTpl<Scalar> FramePlacement;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the frame placement cost model
@@ -63,7 +61,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state,
                              boost::shared_ptr<ActivationModelAbstract> activation, const FramePlacement& Fref,
-                             const std::size_t& nu);
+                             const std::size_t nu);
 
   /**
    * @brief Initialize the frame placement cost model
@@ -87,7 +85,7 @@ class CostModelFramePlacementTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu     Dimension of the control vector
    */
   CostModelFramePlacementTpl(boost::shared_ptr<StateMultibody> state, const FramePlacement& Fref,
-                             const std::size_t& nu);
+                             const std::size_t nu);
 
   /**
    * @brief Initialize the frame placement cost model
@@ -160,8 +158,6 @@ struct CostDataFramePlacementTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
   typedef typename MathBase::Matrix6s Matrix6s;
   typedef typename MathBase::Vector6s Vector6s;

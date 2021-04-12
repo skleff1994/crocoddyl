@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -46,11 +46,9 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector6s Vector6s;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   /**
@@ -63,7 +61,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state,
                                  boost::shared_ptr<ActivationModelAbstract> activation, const Vector6s& mref,
-                                 const std::size_t& nu);
+                                 const std::size_t nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model
@@ -86,7 +84,7 @@ class CostModelCentroidalMomentumTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] mref   Reference centroidal momentum
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, const std::size_t& nu);
+  CostModelCentroidalMomentumTpl(boost::shared_ptr<StateMultibody> state, const Vector6s& mref, const std::size_t nu);
 
   /**
    * @brief Initialize the centroidal momentum cost model
@@ -157,11 +155,7 @@ struct CostDataCentroidalMomentumTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
-  typedef typename MathBase::Matrix6s Matrix6s;
-  typedef typename MathBase::Vector6s Vector6s;
 
   template <template <typename Scalar> class Model>
   CostDataCentroidalMomentumTpl(Model<Scalar>* const model, DataCollectorAbstract* const data)

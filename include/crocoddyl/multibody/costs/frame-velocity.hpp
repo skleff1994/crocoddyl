@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,11 +48,9 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef FrameMotionTpl<Scalar> FrameMotion;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::Matrix3s Matrix3s;
 
   /**
    * @brief Initialize the frame velocity cost model
@@ -64,7 +62,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state,
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameMotion& Fref,
-                            const std::size_t& nu);
+                            const std::size_t nu);
 
   /**
    * @brief Initialize the frame velocity cost model
@@ -87,7 +85,7 @@ class CostModelFrameVelocityTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] Fref   Reference frame velocity
    * @param[in] nu     Dimension of the control vector
    */
-  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& Fref, const std::size_t& nu);
+  CostModelFrameVelocityTpl(boost::shared_ptr<StateMultibody> state, const FrameMotion& Fref, const std::size_t nu);
 
   /**
    * @brief Initialize the frame velocity cost model
@@ -158,8 +156,6 @@ struct CostDataFrameVelocityTpl : public CostDataAbstractTpl<_Scalar> {
   typedef MathBaseTpl<Scalar> MathBase;
   typedef CostDataAbstractTpl<Scalar> Base;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 
   template <template <typename Scalar> class Model>

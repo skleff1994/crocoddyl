@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,8 @@ namespace crocoddyl {
  * \f$\mathbf{l_x}\in\mathbb{R}^{ndx}\f$, \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$,
  * \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$, \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$,
  * \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the Jacobians and Hessians of the cost function, respectively.
+ * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `calc()`, `calcDiff()`, `createData()`
  */
@@ -72,7 +74,7 @@ class ActionModelAbstractTpl {
    * @param[in] nu     Dimension of control vector
    * @param[in] nr     Dimension of cost-residual vector
    */
-  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nu, const std::size_t& nr = 0);
+  ActionModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nu, const std::size_t nr = 0);
   virtual ~ActionModelAbstractTpl();
 
   /**
@@ -140,8 +142,8 @@ class ActionModelAbstractTpl {
    * @param[in] tol     Tolerance
    */
   virtual void quasiStatic(const boost::shared_ptr<ActionDataAbstract>& data, Eigen::Ref<VectorXs> u,
-                           const Eigen::Ref<const VectorXs>& x, const std::size_t& maxiter = 100,
-                           const Scalar& tol = Scalar(1e-9));
+                           const Eigen::Ref<const VectorXs>& x, const std::size_t maxiter = 100,
+                           const Scalar tol = Scalar(1e-9));
 
   /**
    * @copybrief quasicStatic()
@@ -155,17 +157,17 @@ class ActionModelAbstractTpl {
    * @return Quasic static commands
    */
   VectorXs quasiStatic_x(const boost::shared_ptr<ActionDataAbstract>& data, const VectorXs& x,
-                         const std::size_t& maxiter = 100, const Scalar& tol = Scalar(1e-9));
+                         const std::size_t maxiter = 100, const Scalar tol = Scalar(1e-9));
 
   /**
    * @brief Return the dimension of the control input
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Return the dimension of the cost-residual vector
    */
-  const std::size_t& get_nr() const;
+  std::size_t get_nr() const;
 
   /**
    * @brief Return the state
@@ -185,7 +187,7 @@ class ActionModelAbstractTpl {
   /**
    * @brief Indicates if there are defined control limits
    */
-  bool const& get_has_control_limits() const;
+  bool get_has_control_limits() const;
 
   /**
    * @brief Modify the control lower bounds

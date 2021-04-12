@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,6 +49,7 @@ void exposeDifferentialActionNumDiff() {
           "calcDiff", &DifferentialActionModelNumDiff::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the dynamics and cost functions.\n\n"
           "It computes the Jacobian and Hessian using numerical differentiation.\n"
+          "It assumes that calc has been run first.\n"
           ":param data: NumDiff action data\n"
           ":param x: time-discrete state vector\n"
           ":param u: time-discrete control input\n")
@@ -64,14 +65,10 @@ void exposeDifferentialActionNumDiff() {
                     bp::make_function(&DifferentialActionModelNumDiff::get_model,
                                       bp::return_value_policy<bp::return_by_value>()),
                     "action model")
-      .add_property("disturbance",
-                    bp::make_function(&DifferentialActionModelNumDiff::get_disturbance,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("disturbance", bp::make_function(&DifferentialActionModelNumDiff::get_disturbance),
                     &DifferentialActionModelNumDiff::set_disturbance,
                     "disturbance value used in the numerical differentiation")
-      .add_property("withGaussApprox",
-                    bp::make_function(&DifferentialActionModelNumDiff::get_with_gauss_approx,
-                                      bp::return_value_policy<bp::return_by_value>()),
+      .add_property("withGaussApprox", bp::make_function(&DifferentialActionModelNumDiff::get_with_gauss_approx),
                     "Gauss approximation for computing the Hessians");
 
   bp::register_ptr_to_python<boost::shared_ptr<DifferentialActionDataNumDiff> >();

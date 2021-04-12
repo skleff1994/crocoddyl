@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -26,7 +26,7 @@ void exposeCostAbstract() {
       "and the control input u. The dimension of the residual vector is defined by nr, which belongs to\n"
       "the Euclidean space. On the other hand, the activation function builds a cost value based on the\n"
       "definition of the residual vector. The residual vector has to be specialized in a derived classes.",
-      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, int>(
+      bp::init<boost::shared_ptr<StateAbstract>, boost::shared_ptr<ActivationModelAbstract>, std::size_t>(
           bp::args("self", "state", "activation", "nu"),
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
@@ -37,14 +37,14 @@ void exposeCostAbstract() {
           "Initialize the cost model.\n\n"
           ":param state: state description\n"
           ":param activation: Activation model"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, int, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t, std::size_t>(
           bp::args("self", "state", "nr", "nu"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2).\n"
           ":param state: state description\n"
           ":param nr: dimension of residual vector\n"
           ":param nu: dimension of control vector (default state.nv)"))
-      .def(bp::init<boost::shared_ptr<StateAbstract>, int>(
+      .def(bp::init<boost::shared_ptr<StateAbstract>, std::size_t>(
           bp::args("self", "state", "nr"),
           "Initialize the cost model.\n\n"
           "We use ActivationModelQuad as a default activation model (i.e. a=0.5*||r||^2), and the default nu value is "
@@ -61,6 +61,8 @@ void exposeCostAbstract() {
                                                                                   bp::args("self", "data", "x"))
       .def("calcDiff", pure_virtual(&CostModelAbstract_wrap::calcDiff), bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the cost function and its residuals.\n\n"
+           "It computes the partial derivatives of the cost function.\n"
+           "It assumes that calc has been run first.\n"
            ":param data: cost data\n"
            ":param x: state vector\n"
            ":param u: control input\n")
@@ -83,9 +85,7 @@ void exposeCostAbstract() {
           "activation",
           bp::make_function(&CostModelAbstract_wrap::get_activation, bp::return_value_policy<bp::return_by_value>()),
           "activation model")
-      .add_property("nu",
-                    bp::make_function(&CostModelAbstract_wrap::get_nu, bp::return_value_policy<bp::return_by_value>()),
-                    "dimension of control vector");
+      .add_property("nu", bp::make_function(&CostModelAbstract_wrap::get_nu), "dimension of control vector");
 
   bp::register_ptr_to_python<boost::shared_ptr<CostDataAbstract> >();
 
@@ -100,7 +100,7 @@ void exposeCostAbstract() {
                     "shared data")
       .add_property("activation",
                     bp::make_getter(&CostDataAbstract::activation, bp::return_value_policy<bp::return_by_value>()),
-                    "terminal data")
+                    "activation data")
       .add_property("cost", bp::make_getter(&CostDataAbstract::cost, bp::return_value_policy<bp::return_by_value>()),
                     bp::make_setter(&CostDataAbstract::cost), "cost value")
       .add_property("Lx", bp::make_getter(&CostDataAbstract::Lx, bp::return_internal_reference<>()),

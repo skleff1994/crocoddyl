@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,10 +41,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
   typedef CostModelAbstractTpl<Scalar> Base;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
-  typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
 
   /**
    * @brief Initialize the control cost model
@@ -79,7 +76,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] nu          Dimension of the control vector
    */
   CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state,
-                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t& nu);
+                      boost::shared_ptr<ActivationModelAbstract> activation, const std::size_t nu);
 
   /**
    * @brief Initialize the control cost model
@@ -113,7 +110,7 @@ class CostModelControlTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] state       State of the multibody system
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t& nu);
+  CostModelControlTpl(boost::shared_ptr<typename Base::StateAbstract> state, const std::size_t nu);
   virtual ~CostModelControlTpl();
 
   /**

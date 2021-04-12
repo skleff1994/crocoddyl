@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -16,7 +16,6 @@
 #include "crocoddyl/core/state-base.hpp"
 #include "crocoddyl/core/data-collector-base.hpp"
 #include "crocoddyl/core/activation-base.hpp"
-#include "crocoddyl/core/utils/to-string.hpp"
 #include "crocoddyl/core/activations/quadratic.hpp"
 
 namespace crocoddyl {
@@ -39,6 +38,8 @@ namespace crocoddyl {
  * \f$\mathbf{l_u}\in\mathbb{R}^{nu}\f$, \f$\mathbf{l_{xx}}\in\mathbb{R}^{ndx\times ndx}\f$,
  * \f$\mathbf{l_{xu}}\in\mathbb{R}^{ndx\times nu}\f$, \f$\mathbf{l_{uu}}\in\mathbb{R}^{nu\times nu}\f$ are the
  * Jacobians and Hessians, respectively.
+ * Additionally, it is important remark that `calcDiff()` computes the derivates using the latest stored values by
+ * `calc()`. Thus, we need to run first `calc()`.
  *
  * \sa `StateAbstractTpl`, `ActivationModelAbstractTpl`, `calc()`, `calcDiff()`, `createData()`
  */
@@ -65,7 +66,7 @@ class CostModelAbstractTpl {
    * @param[in] nu          Dimension of control vector
    */
   CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, boost::shared_ptr<ActivationModelAbstract> activation,
-                       const std::size_t& nu);
+                       const std::size_t nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -86,7 +87,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr, const std::size_t& nu);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr, const std::size_t nu);
 
   /**
    * @copybrief CostModelAbstractTpl()
@@ -98,7 +99,7 @@ class CostModelAbstractTpl {
    * @param[in] nr     Dimension of residual vector
    * @param[in] nu     Dimension of control vector
    */
-  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t& nr);
+  CostModelAbstractTpl(boost::shared_ptr<StateAbstract> state, const std::size_t nr);
   virtual ~CostModelAbstractTpl();
 
   /**
@@ -113,6 +114,8 @@ class CostModelAbstractTpl {
 
   /**
    * @brief Compute the Jacobian and Hessian of cost and its residual vector
+   *
+   * It computes the Jacobian and Hessian of the cost function. It assumes that `calc()` has been run first.
    *
    * @param[in] data  Cost data
    * @param[in] x     State point \f$\mathbf{x}\in\mathbb{R}^{ndx}\f$
@@ -162,7 +165,7 @@ class CostModelAbstractTpl {
   /**
    * @brief Return the dimension of the control input
    */
-  const std::size_t& get_nu() const;
+  std::size_t get_nu() const;
 
   /**
    * @brief Modify the cost reference

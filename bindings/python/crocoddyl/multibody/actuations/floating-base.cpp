@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -28,8 +28,8 @@ void exposeActuationFloatingBase() {
            ":param u: control input")
       .def("calcDiff", &ActuationModelFloatingBase::calcDiff, bp::args("self", "data", "x", "u"),
            "Compute the derivatives of the actuation model.\n\n"
-           "It computes the partial derivatives of the floating-base actuation. It assumes that you\n"
-           "create the data using this class. The reason is that the derivatives are constant and\n"
+           "It computes the partial derivatives of the floating-base actuation. It assumes that calc\n"
+           "has been run first. The reason is that the derivatives are constant and\n"
            "defined in createData. The derivatives are constant, so we don't write again these values.\n"
            ":param data: floating-base actuation data\n"
            ":param x: state vector\n"

@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh, IRI: CSIC-UPC
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,9 +47,9 @@ void exposeIntegratedActionRK4() {
                                               const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &IntegratedActionModelRK4::calcDiff, bp::args("self", "data", "x", "u"),
           "Computes the derivatives of the integrated action model wrt state and control. \n\n"
-          "It assumes that calc has been run first.\n"
           "This function builds a quadratic approximation of the\n"
           "action model (i.e. dynamical system and cost function).\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n")
@@ -61,9 +61,8 @@ void exposeIntegratedActionRK4() {
                     bp::make_function(&IntegratedActionModelRK4::get_differential,
                                       bp::return_value_policy<bp::return_by_value>()),
                     &IntegratedActionModelRK4::set_differential, "differential action model")
-      .add_property(
-          "dt", bp::make_function(&IntegratedActionModelRK4::get_dt, bp::return_value_policy<bp::return_by_value>()),
-          &IntegratedActionModelRK4::set_dt, "step time");
+      .add_property("dt", bp::make_function(&IntegratedActionModelRK4::get_dt), &IntegratedActionModelRK4::set_dt,
+                    "step time");
 
   bp::register_ptr_to_python<boost::shared_ptr<IntegratedActionDataRK4> >();
 

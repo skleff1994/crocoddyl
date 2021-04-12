@@ -9,7 +9,7 @@ import example_robot_data
 WITHDISPLAY = 'display' in sys.argv or 'CROCODDYL_DISPLAY' in os.environ
 WITHPLOT = 'plot' in sys.argv or 'CROCODDYL_PLOT' in os.environ
 
-hector = example_robot_data.loadHector()
+hector = example_robot_data.load('hector')
 robot_model = hector.model
 
 target_pos = np.array([1, 0, 1])
@@ -24,7 +24,7 @@ l_lim = 0.1
 tau_f = np.array([[0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0], [1.0, 1.0, 1.0, 1.0], [0.0, d_cog, 0.0, -d_cog],
                   [-d_cog, 0.0, d_cog, 0.0], [-cm / cf, cm / cf, -cm / cf, cm / cf]])
 
-actModel = crocoddyl.ActuationModelMultiCopterBase(state, 4, tau_f)
+actModel = crocoddyl.ActuationModelMultiCopterBase(state, tau_f)
 
 runningCostModel = crocoddyl.CostModelSum(state, actModel.nu)
 terminalCostModel = crocoddyl.CostModelSum(state, actModel.nu)

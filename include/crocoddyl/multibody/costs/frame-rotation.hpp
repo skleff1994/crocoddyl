@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,6 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
   typedef StateMultibodyTpl<Scalar> StateMultibody;
   typedef CostDataAbstractTpl<Scalar> CostDataAbstract;
   typedef ActivationModelAbstractTpl<Scalar> ActivationModelAbstract;
-  typedef ActivationModelQuadTpl<Scalar> ActivationModelQuad;
   typedef FrameRotationTpl<Scalar> FrameRotation;
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::VectorXs VectorXs;
@@ -63,7 +62,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
    */
   CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state,
                             boost::shared_ptr<ActivationModelAbstract> activation, const FrameRotation& Fref,
-                            const std::size_t& nu);
+                            const std::size_t nu);
 
   /**
    * @brief Initialize the frame rotation cost model
@@ -88,7 +87,7 @@ class CostModelFrameRotationTpl : public CostModelAbstractTpl<_Scalar> {
    * @param[in] Fref        Reference frame rotation
    * @param[in] nu          Dimension of the control vector
    */
-  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t& nu);
+  CostModelFrameRotationTpl(boost::shared_ptr<StateMultibody> state, const FrameRotation& Fref, const std::size_t nu);
 
   /**
    * @brief Initialize the frame rotation cost model
@@ -164,8 +163,6 @@ struct CostDataFrameRotationTpl : public CostDataAbstractTpl<_Scalar> {
   typedef DataCollectorAbstractTpl<Scalar> DataCollectorAbstract;
   typedef typename MathBase::Vector3s Vector3s;
   typedef typename MathBase::Matrix3s Matrix3s;
-  typedef typename MathBase::VectorXs VectorXs;
-  typedef typename MathBase::MatrixXs MatrixXs;
   typedef typename MathBase::Matrix3xs Matrix3xs;
   typedef typename MathBase::Matrix6xs Matrix6xs;
 

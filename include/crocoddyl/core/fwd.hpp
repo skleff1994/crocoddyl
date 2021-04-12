@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -65,6 +65,16 @@ class ActivationModelWeightedQuadraticBarrierTpl;
 
 template <typename Scalar>
 class ActivationModelQuadTpl;
+
+template <typename Scalar>
+class ActivationModelQuadFlatExpTpl;
+template <typename Scalar>
+struct ActivationDataQuadFlatExpTpl;
+
+template <typename Scalar>
+class ActivationModelQuadFlatLogTpl;
+template <typename Scalar>
+struct ActivationDataQuadFlatLogTpl;
 
 template <typename Scalar>
 class ActivationModelWeightedQuadTpl;
@@ -193,6 +203,10 @@ typedef ActivationModelQuadraticBarrierTpl<double> ActivationModelQuadraticBarri
 typedef ActivationBoundsTpl<double> ActivationBounds;
 typedef ActivationModelWeightedQuadraticBarrierTpl<double> ActivationModelWeightedQuadraticBarrier;
 typedef ActivationModelQuadTpl<double> ActivationModelQuad;
+typedef ActivationModelQuadFlatExpTpl<double> ActivationModelQuadFlatExp;
+typedef ActivationDataQuadFlatExpTpl<double> ActivationDataQuadFlatExp;
+typedef ActivationModelQuadFlatLogTpl<double> ActivationModelQuadFlatLog;
+typedef ActivationDataQuadFlatLogTpl<double> ActivationDataQuadFlatLog;
 typedef ActivationModelWeightedQuadTpl<double> ActivationModelWeightedQuad;
 typedef ActivationDataWeightedQuadTpl<double> ActivationDataWeightedQuad;
 DEPRECATED("Use ActivationModelSmooth1Norm", typedef ActivationModelSmooth1NormTpl<double> ActivationModelSmoothAbs;)

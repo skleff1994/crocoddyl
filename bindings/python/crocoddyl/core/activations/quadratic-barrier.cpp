@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,6 +48,7 @@ void exposeActivationQuadraticBarrier() {
            "Compute the derivatives of inequality activation.\n\n"
            ":param data: activation data\n"
            "Note that the Hessian is constant, so we don't write again this value.\n"
+           "It assumes that calc has been run first.\n"
            ":param r: residual vector \n")
       .def("createData", &ActivationModelQuadraticBarrier::createData, bp::args("self"),
            "Create the weighted quadratic action data.")

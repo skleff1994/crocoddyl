@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -75,6 +75,7 @@ void exposeCostContactForce() {
                                            const Eigen::Ref<const Eigen::VectorXd>&)>(
           "calcDiff", &CostModelContactForce::calcDiff, bp::args("self", "data", "x", "u"),
           "Compute the derivatives of the contact force cost.\n\n"
+          "It assumes that calc has been run first.\n"
           ":param data: action data\n"
           ":param x: state vector\n"
           ":param u: control input\n")

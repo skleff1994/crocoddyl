@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // BSD 3-Clause License
 //
-// Copyright (C) 2018-2020, LAAS-CNRS, University of Edinburgh
+// Copyright (C) 2019-2020, LAAS-CNRS, University of Edinburgh
 // Copyright note valid unless otherwise stated in individual files.
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,7 +54,7 @@ void exposeSolverAbstract() {
            "(xs, us) of T+1 and T elements, respectively.\n"
            ":params recalc: true for recalculating the derivatives at current state and control.\n"
            ":returns the search direction dx, du and the dual lambdas as lists of T+1, T and T+1 lengths.")
-      .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", " stepLength"),
+      .def("tryStep", pure_virtual(&SolverAbstract_wrap::tryStep), bp::args("self", "stepLength"),
            "Try a predefined step length and compute its cost improvement.\n\n"
            "It uses the search direction found by computeDirection to try a\n"
            "determined step length; so you need to run first computeDirection.\n"
@@ -106,23 +106,17 @@ void exposeSolverAbstract() {
           bp::make_function(&SolverAbstract_wrap::set_us), "control sequence")
       .def_readwrite("isFeasible", &SolverAbstract_wrap::is_feasible_, "feasible (xs,us)")
       .def_readwrite("cost", &SolverAbstract_wrap::cost_, "total cost")
-      .add_property(
-          "x_reg",
-          bp::make_function(&SolverAbstract_wrap::get_xreg, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_xreg), "state regularization")
-      .add_property(
-          "u_reg",
-          bp::make_function(&SolverAbstract_wrap::get_ureg, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
+      .def_readwrite("stop", &SolverAbstract_wrap::stop_, "stopping criteria value")
+      .def_readwrite("d", &SolverAbstract_wrap::d_, "expected improvement")
+      .add_property("x_reg", bp::make_function(&SolverAbstract_wrap::get_xreg),
+                    bp::make_function(&SolverAbstract_wrap::set_xreg), "state regularization")
+      .add_property("u_reg", bp::make_function(&SolverAbstract_wrap::get_ureg),
+                    bp::make_function(&SolverAbstract_wrap::set_ureg), "control regularization")
       .def_readwrite("stepLength", &SolverAbstract_wrap::steplength_, "applied step length")
-      .add_property("th_acceptStep",
-                    bp::make_function(&SolverAbstract_wrap::get_th_acceptstep,
-                                      bp::return_value_policy<bp::copy_const_reference>()),
+      .add_property("th_acceptStep", bp::make_function(&SolverAbstract_wrap::get_th_acceptstep),
                     bp::make_function(&SolverAbstract_wrap::set_th_acceptstep), "threshold for step acceptance")
-      .add_property(
-          "th_stop",
-          bp::make_function(&SolverAbstract_wrap::get_th_stop, bp::return_value_policy<bp::copy_const_reference>()),
-          bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
+      .add_property("th_stop", bp::make_function(&SolverAbstract_wrap::get_th_stop),
+                    bp::make_function(&SolverAbstract_wrap::set_th_stop), "threshold for stopping criteria")
       .def_readwrite("iter", &SolverAbstract_wrap::iter_, "number of iterations runned in solve()");
 
   bp::class_<CallbackAbstract_wrap, boost::noncopyable>(
