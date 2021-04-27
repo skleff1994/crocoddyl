@@ -26,6 +26,7 @@ void exposeActuationSquashing();
 void exposeDataCollectorActuation();
 void exposeIntegratedActionEuler();
 void exposeIntegratedActionRK4();
+void exposeIntegratedActionLPF();
 void exposeCostAbstract();
 void exposeCostSum();
 void exposeCostControl();

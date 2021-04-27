@@ -13,10 +13,36 @@
 
 namespace crocoddyl {
 
+// template <typename Scalar>
+// IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
+//     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& nu, const Scalar& time_step, const bool& with_cost_residual, const Scalar& alpha)
+//     : Base(model->get_state(), model->get_nu(), model->get_nr()),
+//       differential_(model),
+//       time_step_(time_step),
+//       time_step2_(time_step * time_step),
+//       with_cost_residual_(with_cost_residual),
+//       alpha_(alpha),
+//       nw_(model->get_nu()),
+//       ny_(model->get_state()->get_nx() + model->get_nu()),
+//       enable_integration_(true) {
+//   Base::set_u_lb(differential_->get_u_lb());
+//   Base::set_u_ub(differential_->get_u_ub());
+//   if (time_step_ < Scalar(0.)) {
+//     time_step_ = Scalar(1e-3);
+//     time_step2_ = time_step_ * time_step_;
+//     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
+//   }
+//   if (time_step == Scalar(0.)) {
+//     enable_integration_ = false;
+//   }
+//   // overwrite the state
+//   // state2_ = StateLPFTpl<Scalar> (static_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
+// }
+
 template <typename Scalar>
 IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& nu, const Scalar& time_step, const bool& with_cost_residual, const Scalar& alpha)
-    : Base(model->get_state(), model->get_nu(), model->get_nr()),
+    : Base(boost::make_shared<StateAbstract>(model->get_state()->get_nx()+model->get_nu()), model->get_state()->get_nx()+model->get_nu()), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),
@@ -47,8 +73,8 @@ void IntegratedActionModelLPFTpl<Scalar>::calc(const boost::shared_ptr<ActionDat
                                                const Eigen::Ref<const VectorXs>& y,
                                                const Eigen::Ref<const VectorXs>& w) {
 
-  const Eigen::Ref<const VectorXs>& x = y.head(state_->get_nx());
-  const Eigen::Ref<const VectorXs>& u = alpha_*y.tail(nw_) + (1-alpha_)*w;
+  const Eigen::Ref<const VectorXs>& x = y.head(state_->get_nx());          // get q,v_q
+  const Eigen::Ref<const VectorXs>& u = alpha_*y.tail(nw_) + (1-alpha_)*w; // get tau_q+
 
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
@@ -66,7 +92,7 @@ void IntegratedActionModelLPFTpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  differential_->calc(d->differential, x, u);
+  differential_->calc(d->differential, x, u); // get a_q = DAM(q, v_q, tau_q+)
 
   // Computing the next state (discrete time)
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =
@@ -76,11 +102,11 @@ void IntegratedActionModelLPFTpl<Scalar>::calc(const boost::shared_ptr<ActionDat
     d->dx.head(nv).noalias() = v * time_step_ + a * time_step2_;
     d->dx.tail(nv).noalias() = a * time_step_;
     d->cost = time_step_ * d->differential->cost;
-    const VectorXs& xplus = VectorXs::Zero(differential_->get_state()->get_nx());
-    differential_->get_state()->integrate(x, d->dx, d->xnext);
-    // NOT SURE HOW TO SET THIS PART FROM DIFFERENTIAL
-    d->xnext.head(differential_->get_state()->get_nx()).noalias() = xplus;
-    d->xnext.tail(differential_->get_state()->get_nx()).noalias() = u;
+    // const VectorXs& xplus = VectorXs::Zero(differential_->get_state()->get_nx());
+    differential_->get_state()->integrate(x, d->dx, d->xnext); // get (q+, vq+) = int(a_q)
+    // // NOT SURE HOW TO SET THIS PART FROM DIFFERENTIAL
+    // d->xnext.head(differential_->get_state()->get_nx()).noalias() = xplus;
+    // d->xnext.tail(differential_->get_state()->get_nx()).noalias() = u;
   } else {
     d->dx.setZero();
     d->xnext = y;
@@ -109,6 +135,10 @@ template <typename Scalar>
 void IntegratedActionModelLPFTpl<Scalar>::calcDiff(const boost::shared_ptr<ActionDataAbstract>& data,
                                                      const Eigen::Ref<const VectorXs>& x,
                                                      const Eigen::Ref<const VectorXs>& u) {
+  
+//   const Eigen::Ref<const VectorXs>& x = y.head(state_->get_nx());
+//   const Eigen::Ref<const VectorXs>& u = y.tail(state_->get_nu());
+
   if (static_cast<std::size_t>(x.size()) != state_->get_nx()) {
     throw_pretty("Invalid argument: "
                  << "x has wrong dimension (it should be " + std::to_string(state_->get_nx()) + ")");
@@ -152,7 +182,7 @@ void IntegratedActionModelLPFTpl<Scalar>::calcDiff(const boost::shared_ptr<Actio
     d->Lu = d->differential->Lu;
     d->Lxx = d->differential->Lxx;
     d->Lxu = d->differential->Lxu;
-    d->Luu = d->differential->Luu;
+    d->Luu = d->differential->Luu; 
   }
 }
 

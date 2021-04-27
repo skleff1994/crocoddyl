@@ -15,6 +15,8 @@ namespace crocoddyl {
 template <typename Scalar>
 StateLPFTpl<Scalar>::StateLPFTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model, std::size_t nu)
     : Base(model->nq + model->nv + nu, 2 * model->nv + nu), pinocchio_(model), x0_(VectorXs::Zero(model->nq + model->nv + nu)) {
+  x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
+
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
   // Instead simple represents any joint that can model within the Euclidean manifold.
@@ -38,10 +40,8 @@ StateLPFTpl<Scalar>::StateLPFTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> >
   lb_.tail(nw_) = -pinocchio_->effortLimit;
   ub_.tail(nw_) = pinocchio_->effortLimit;
   Base::update_has_limits();
-
-
-  x0_ = VectorXs::Zero(ny_); // BUG of else some values were uninitialized
-  x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
+//   x0_ = VectorXs::Zero(ny_); // BUG of else some values were uninitialized
+//   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 }
 
 template <typename Scalar>
