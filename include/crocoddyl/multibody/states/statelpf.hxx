@@ -87,7 +87,7 @@ void StateLPFTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& y0, const Eigen
   }
 
   pinocchio::difference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), dyout.head(nv_));
-  dyout.tail(nv_) = y1.tail(nv_) - y0.tail(nv_);
+  dyout.tail(nv_ + nw_) = y1.tail(nv_ + nw_) - y0.tail(nv_ + nw_);
 }
 
 template <typename Scalar>
@@ -107,7 +107,7 @@ void StateLPFTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& y, const E
   }
 
   pinocchio::integrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), yout.head(nq_));
-  yout.tail(nv_) = y.tail(nv_) + dy.tail(nv_);
+  yout.tail(nv_ + nw_) = y.tail(nv_ + nw_) + dy.tail(nv_ + nw_);
 }
 
 template <typename Scalar>
@@ -133,7 +133,8 @@ void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& y0, const Eige
 
     pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
                            pinocchio::ARG0);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
+    Jfirst.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)-1;
+    Jfirst.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)-1;
   } else if (firstsecond == second) {
     if (static_cast<std::size_t>(Jsecond.rows()) != ndy_ || static_cast<std::size_t>(Jsecond.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
@@ -142,7 +143,8 @@ void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& y0, const Eige
     }
     pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
                            pinocchio::ARG1);
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+    Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)1;
+    Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)1;
   } else {  // computing both
     if (static_cast<std::size_t>(Jfirst.rows()) != ndy_ || static_cast<std::size_t>(Jfirst.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
@@ -158,8 +160,10 @@ void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& y0, const Eige
                            pinocchio::ARG0);
     pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
                            pinocchio::ARG1);
-    Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
-    Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+    Jfirst.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)-1;
+    Jfirst.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)-1;
+    Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)1;
+    Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)1;
   }
 }
 
@@ -179,17 +183,20 @@ void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& y, const 
       case setto:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::SETTO);
-        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        Jfirst.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)1;
+        Jfirst.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)1;
         break;
       case addto:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::ADDTO);
-        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        Jfirst.block(nq_, nq_, nv_, nv_).diagonal().array() += (Scalar)1;
+        Jfirst.bottomRightCorner(nw_, nw_).diagonal().array() += (Scalar)1;
         break;
       case rmfrom:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::RMTO);
-        Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        Jfirst.block(nq_, nq_, nv_, nv_).diagonal().array() -= (Scalar)1;
+        Jfirst.bottomRightCorner(nw_, nw_).diagonal().array() -= (Scalar)1;
         break;
       default:
         throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
@@ -206,17 +213,20 @@ void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& y, const 
       case setto:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::SETTO);
-        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
+        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() = (Scalar)1;
+        Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() = (Scalar)1;
         break;
       case addto:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::ADDTO);
-        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
+        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() += (Scalar)1
+        Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() += (Scalar)1;
         break;
       case rmfrom:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::RMTO);
-        Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
+        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() -= (Scalar)1
+        Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() -= (Scalar)1;
         break;
       default:
         throw_pretty("Invalid argument: allowed operators: setto, addto, rmfrom");
