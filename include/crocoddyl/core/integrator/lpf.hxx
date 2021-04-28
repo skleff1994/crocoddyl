@@ -13,36 +13,10 @@
 
 namespace crocoddyl {
 
-// template <typename Scalar>
-// IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
-//     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& nu, const Scalar& time_step, const bool& with_cost_residual, const Scalar& alpha)
-//     : Base(model->get_state(), model->get_nu(), model->get_nr()),
-//       differential_(model),
-//       time_step_(time_step),
-//       time_step2_(time_step * time_step),
-//       with_cost_residual_(with_cost_residual),
-//       alpha_(alpha),
-//       nw_(model->get_nu()),
-//       ny_(model->get_state()->get_nx() + model->get_nu()),
-//       enable_integration_(true) {
-//   Base::set_u_lb(differential_->get_u_lb());
-//   Base::set_u_ub(differential_->get_u_ub());
-//   if (time_step_ < Scalar(0.)) {
-//     time_step_ = Scalar(1e-3);
-//     time_step2_ = time_step_ * time_step_;
-//     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
-//   }
-//   if (time_step == Scalar(0.)) {
-//     enable_integration_ = false;
-//   }
-//   // overwrite the state
-//   // state2_ = StateLPFTpl<Scalar> (static_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
-// }
-
 template <typename Scalar>
 IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& nu, const Scalar& time_step, const bool& with_cost_residual, const Scalar& alpha)
-    : Base(boost::make_shared<StateAbstract>(model->get_state()->get_nx()+model->get_nu()), model->get_state()->get_nx()+model->get_nu()), model->get_nu(), model->get_nr()),
+    : Base(model->get_state(), model->get_nu(), model->get_nr()),
       differential_(model),
       time_step_(time_step),
       time_step2_(time_step * time_step),
@@ -64,6 +38,32 @@ IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
   // overwrite the state
   // state2_ = StateLPFTpl<Scalar> (static_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
 }
+
+// template <typename Scalar>
+// IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
+//     boost::shared_ptr<DifferentialActionModelAbstract> model, const Scalar& nu, const Scalar& time_step, const bool& with_cost_residual, const Scalar& alpha)
+//     : Base(boost::make_shared<StateAbstract>(model->get_state()->get_nx()+model->get_nu()), model->get_state()->get_nx()+model->get_nu()), model->get_nu(), model->get_nr()),
+//       differential_(model),
+//       time_step_(time_step),
+//       time_step2_(time_step * time_step),
+//       with_cost_residual_(with_cost_residual),
+//       alpha_(alpha),
+//       nw_(model->get_nu()),
+//       ny_(model->get_state()->get_nx() + model->get_nu()),
+//       enable_integration_(true) {
+//   Base::set_u_lb(differential_->get_u_lb());
+//   Base::set_u_ub(differential_->get_u_ub());
+//   if (time_step_ < Scalar(0.)) {
+//     time_step_ = Scalar(1e-3);
+//     time_step2_ = time_step_ * time_step_;
+//     std::cerr << "Warning: dt should be positive, set to 1e-3" << std::endl;
+//   }
+//   if (time_step == Scalar(0.)) {
+//     enable_integration_ = false;
+//   }
+//   // overwrite the state
+//   // state2_ = StateLPFTpl<Scalar> (static_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
+// }
 
 template <typename Scalar>
 IntegratedActionModelLPFTpl<Scalar>::~IntegratedActionModelLPFTpl() {}
@@ -92,7 +92,7 @@ void IntegratedActionModelLPFTpl<Scalar>::calc(const boost::shared_ptr<ActionDat
   boost::shared_ptr<Data> d = boost::static_pointer_cast<Data>(data);
 
   // Computing the acceleration and cost
-  differential_->calc(d->differential, x, u); // get a_q = DAM(q, v_q, tau_q+)
+  differential_->calc(d->differential, x, u); // get a_q = DAM(q, v_q, tau_q+) // here use tau or tau+
 
   // Computing the next state (discrete time)
   const Eigen::VectorBlock<const Eigen::Ref<const VectorXs>, Eigen::Dynamic> v =

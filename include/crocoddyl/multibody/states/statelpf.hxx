@@ -14,8 +14,8 @@ namespace crocoddyl {
 
 template <typename Scalar>
 StateLPFTpl<Scalar>::StateLPFTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> > model, std::size_t nu)
-    : Base(model->nq + model->nv + nu, 2 * model->nv + nu), pinocchio_(model), x0_(VectorXs::Zero(model->nq + model->nv + nu)) {
-  x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
+    : Base(model->nq + model->nv + nu, 2 * model->nv + nu), pinocchio_(model), y0_(VectorXs::Zero(model->nq + model->nv + nu)) {
+  y0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 
   // In a multibody system, we could define the first joint using Lie groups.
   // The current cases are free-flyer (SE3) and spherical (S03).
@@ -24,8 +24,9 @@ StateLPFTpl<Scalar>::StateLPFTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> >
 
   nq_ = model->nq;
   nv_ = model->nv;
-  nx_ = nq_ + nv_;
+  ny_ = nq_ + nv_;
   ny_ = nu + nx_;
+  ndy_ = nu + ndx_;
   nw_ = nu;
 
   // Define internally the limits of the first joint
@@ -40,8 +41,8 @@ StateLPFTpl<Scalar>::StateLPFTpl(boost::shared_ptr<pinocchio::ModelTpl<Scalar> >
   lb_.tail(nw_) = -pinocchio_->effortLimit;
   ub_.tail(nw_) = pinocchio_->effortLimit;
   Base::update_has_limits();
-//   x0_ = VectorXs::Zero(ny_); // BUG of else some values were uninitialized
-//   x0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
+  y0_.tail(nv_ + nu) = VectorXs::Zero(nv_ + nu); // BUG of else some values were uninitialized
+//   y0_.head(nq_) = pinocchio::neutral(*pinocchio_.get());
 }
 
 template <typename Scalar>
@@ -59,103 +60,103 @@ const std::size_t& StateLPFTpl<Scalar>::get_ny() const {
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateLPFTpl<Scalar>::zero() const {
-  return x0_;
+  return y0_;
 }
 
 template <typename Scalar>
 typename MathBaseTpl<Scalar>::VectorXs StateLPFTpl<Scalar>::rand() const {
-  VectorXs xrand = VectorXs::Random(nx_);
-  xrand.head(nq_) = pinocchio::randomConfiguration(*pinocchio_.get());
-  return xrand;
+  VectorXs yrand = VectorXs::Random(ny_);
+  yrand.head(nq_) = pinocchio::randomConfiguration(*pinocchio_.get());
+  return yrand;
 }
 
 template <typename Scalar>
-void StateLPFTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
-                                     Eigen::Ref<VectorXs> dxout) const {
-  if (static_cast<std::size_t>(x0.size()) != nx_) {
+void StateLPFTpl<Scalar>::diff(const Eigen::Ref<const VectorXs>& y0, const Eigen::Ref<const VectorXs>& y1,
+                                     Eigen::Ref<VectorXs> dyout) const {
+  if (static_cast<std::size_t>(y0.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "y0 has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
-  if (static_cast<std::size_t>(x1.size()) != nx_) {
+  if (static_cast<std::size_t>(y1.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "y1 has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
-  if (static_cast<std::size_t>(dxout.size()) != ndx_) {
+  if (static_cast<std::size_t>(dyout.size()) != ndy_) {
     throw_pretty("Invalid argument: "
-                 << "dxout has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+                 << "dyout has wrong dimension (it should be " + std::to_string(ndy_) + ")");
   }
 
-  pinocchio::difference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), dxout.head(nv_));
-  dxout.tail(nv_) = x1.tail(nv_) - x0.tail(nv_);
+  pinocchio::difference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), dyout.head(nv_));
+  dyout.tail(nv_) = y1.tail(nv_) - y0.tail(nv_);
 }
 
 template <typename Scalar>
-void StateLPFTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
-                                          Eigen::Ref<VectorXs> xout) const {
-  if (static_cast<std::size_t>(x.size()) != nx_) {
+void StateLPFTpl<Scalar>::integrate(const Eigen::Ref<const VectorXs>& y, const Eigen::Ref<const VectorXs>& dy,
+                                          Eigen::Ref<VectorXs> yout) const {
+  if (static_cast<std::size_t>(y.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "x has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "y has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
-  if (static_cast<std::size_t>(dx.size()) != ndx_) {
+  if (static_cast<std::size_t>(dy.size()) != ndy_) {
     throw_pretty("Invalid argument: "
-                 << "dx has wrong dimension (it should be " + std::to_string(ndx_) + ")");
+                 << "dy has wrong dimension (it should be " + std::to_string(ndy_) + ")");
   }
-  if (static_cast<std::size_t>(xout.size()) != nx_) {
+  if (static_cast<std::size_t>(yout.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "xout has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "yout has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
 
-  pinocchio::integrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), xout.head(nq_));
-  xout.tail(nv_) = x.tail(nv_) + dx.tail(nv_);
+  pinocchio::integrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), yout.head(nq_));
+  yout.tail(nv_) = y.tail(nv_) + dy.tail(nv_);
 }
 
 template <typename Scalar>
-void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eigen::Ref<const VectorXs>& x1,
+void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& y0, const Eigen::Ref<const VectorXs>& y1,
                                       Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                                       const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
-  if (static_cast<std::size_t>(x0.size()) != nx_) {
+  if (static_cast<std::size_t>(y0.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "x0 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "y0 has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
-  if (static_cast<std::size_t>(x1.size()) != nx_) {
+  if (static_cast<std::size_t>(y1.size()) != ny_) {
     throw_pretty("Invalid argument: "
-                 << "x1 has wrong dimension (it should be " + std::to_string(nx_) + ")");
+                 << "y1 has wrong dimension (it should be " + std::to_string(ny_) + ")");
   }
 
   if (firstsecond == first) {
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndy_ || static_cast<std::size_t>(Jfirst.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
+                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndy_) + "," + std::to_string(ndy_) +
                           ")");
     }
 
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
                            pinocchio::ARG0);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
   } else if (firstsecond == second) {
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndy_ || static_cast<std::size_t>(Jsecond.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
+                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndy_) + "," +
+                          std::to_string(ndy_) + ")");
     }
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
                            pinocchio::ARG1);
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
   } else {  // computing both
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndy_ || static_cast<std::size_t>(Jfirst.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
+                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndy_) + "," + std::to_string(ndy_) +
                           ")");
     }
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndy_ || static_cast<std::size_t>(Jsecond.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
+                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndy_) + "," +
+                          std::to_string(ndy_) + ")");
     }
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
+    pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jfirst.topLeftCorner(nv_, nv_),
                            pinocchio::ARG0);
-    pinocchio::dDifference(*pinocchio_.get(), x0.head(nq_), x1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
+    pinocchio::dDifference(*pinocchio_.get(), y0.head(nq_), y1.head(nq_), Jsecond.topLeftCorner(nv_, nv_),
                            pinocchio::ARG1);
     Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)-1;
     Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
@@ -163,30 +164,30 @@ void StateLPFTpl<Scalar>::Jdiff(const Eigen::Ref<const VectorXs>& x0, const Eige
 }
 
 template <typename Scalar>
-void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const Eigen::Ref<const VectorXs>& dx,
+void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& y, const Eigen::Ref<const VectorXs>& dy,
                                            Eigen::Ref<MatrixXs> Jfirst, Eigen::Ref<MatrixXs> Jsecond,
                                            const Jcomponent firstsecond, const AssignmentOp op) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
   assert_pretty(is_a_AssignmentOp(op), ("op must be one of the AssignmentOp {settop, addto, rmfrom}"));
   if (firstsecond == first || firstsecond == both) {
-    if (static_cast<std::size_t>(Jfirst.rows()) != ndx_ || static_cast<std::size_t>(Jfirst.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jfirst.rows()) != ndy_ || static_cast<std::size_t>(Jfirst.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndx_) + "," + std::to_string(ndx_) +
+                   << "Jfirst has wrong dimension (it should be " + std::to_string(ndy_) + "," + std::to_string(ndy_) +
                           ")");
     }
     switch (op) {
       case setto:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::SETTO);
         Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
         break;
       case addto:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::ADDTO);
         Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
         break;
       case rmfrom:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jfirst.topLeftCorner(nv_, nv_),
                               pinocchio::ARG0, pinocchio::RMTO);
         Jfirst.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
         break;
@@ -196,24 +197,24 @@ void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const 
     }
   }
   if (firstsecond == second || firstsecond == both) {
-    if (static_cast<std::size_t>(Jsecond.rows()) != ndx_ || static_cast<std::size_t>(Jsecond.cols()) != ndx_) {
+    if (static_cast<std::size_t>(Jsecond.rows()) != ndy_ || static_cast<std::size_t>(Jsecond.cols()) != ndy_) {
       throw_pretty("Invalid argument: "
-                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndx_) + "," +
-                          std::to_string(ndx_) + ")");
+                   << "Jsecond has wrong dimension (it should be " + std::to_string(ndy_) + "," +
+                          std::to_string(ndy_) + ")");
     }
     switch (op) {
       case setto:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::SETTO);
         Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() = (Scalar)1;
         break;
       case addto:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::ADDTO);
         Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() += (Scalar)1;
         break;
       case rmfrom:
-        pinocchio::dIntegrate(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
+        pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::RMTO);
         Jsecond.bottomRightCorner(nv_, nv_).diagonal().array() -= (Scalar)1;
         break;
@@ -225,17 +226,17 @@ void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& x, const 
 }
 
 template <typename Scalar>
-void StateLPFTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>& x,
-                                                    const Eigen::Ref<const VectorXs>& dx, Eigen::Ref<MatrixXs> Jin,
+void StateLPFTpl<Scalar>::JintegrateTransport(const Eigen::Ref<const VectorXs>& y,
+                                                    const Eigen::Ref<const VectorXs>& dy, Eigen::Ref<MatrixXs> Jin,
                                                     const Jcomponent firstsecond) const {
   assert_pretty(is_a_Jcomponent(firstsecond), ("firstsecond must be one of the Jcomponent {both, first, second}"));
 
   switch (firstsecond) {
     case first:
-      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG0);
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jin.topRows(nv_), pinocchio::ARG0);
       break;
     case second:
-      pinocchio::dIntegrateTransport(*pinocchio_.get(), x.head(nq_), dx.head(nv_), Jin.topRows(nv_), pinocchio::ARG1);
+      pinocchio::dIntegrateTransport(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jin.topRows(nv_), pinocchio::ARG1);
       break;
     default:
       throw_pretty(

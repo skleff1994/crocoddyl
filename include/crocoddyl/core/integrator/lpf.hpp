@@ -85,27 +85,7 @@ struct IntegratedActionDataLPFTpl : public ActionDataAbstractTpl<_Scalar> {
   typedef typename MathBase::MatrixXs MatrixXs;
 
   template <template <typename Scalar> class Model>
-  explicit IntegratedActionDataLPFTpl(Model<Scalar>* const model) 
-    : Base(model), 
-      cost(Scalar(0.)),
-      xnext(model->get_state()->get_nx()),
-      Fx(model->get_state()->get_ndx()+model->get_nu(), model->get_state()->get_ndx()+model->get_nu()),
-      Fu(model->get_state()->get_ndx()+model->get_nu(), model->get_nu()),
-      r(model->get_nr()),
-      Lx(model->get_state()->get_ndx()+model->get_nu()),
-      Lu(model->get_nu()),
-      Lxx(model->get_state()->get_ndx()+model->get_nu(), model->get_state()->get_ndx()+model->get_nu()),
-      Lxu(model->get_state()->get_ndx()+model->get_nu(), model->get_nu()),
-      Luu(model->get_nu(), model->get_nu()) {
-        xnext.setZero();
-        Fx.setZero();
-        Fu.setZero();
-        r.setZero();
-        Lx.setZero();
-        Lu.setZero();
-        Lxx.setZero();
-        Lxu.setZero();
-        Luu.setZero();
+  explicit IntegratedActionDataLPFTpl(Model<Scalar>* const model) : Base(model) {
         differential = model->get_differential()->createData();
         const std::size_t& ndy = model->get_state()->get_ndx() + model->get_nu(); // replace by ndy from stateLPF ?
         dx = VectorXs::Zero(ndy);
@@ -115,16 +95,16 @@ struct IntegratedActionDataLPFTpl : public ActionDataAbstractTpl<_Scalar> {
   boost::shared_ptr<DifferentialActionDataAbstractTpl<Scalar> > differential;
   VectorXs dx;
 
-  Scalar cost;     //!< cost value
-  VectorXs xnext;  //!< evolution state
-  MatrixXs Fx;     //!< Jacobian of the dynamics
-  MatrixXs Fu;     //!< Jacobian of the dynamics
-  VectorXs r;      //!< Cost residual
-  VectorXs Lx;     //!< Jacobian of the cost function
-  VectorXs Lu;     //!< Jacobian of the cost function
-  MatrixXs Lxx;    //!< Hessian of the cost function
-  MatrixXs Lxu;    //!< Hessian of the cost function
-  MatrixXs Luu;    //!< Hessian of the cost function
+  using Base::cost;
+  using Base::Fu;
+  using Base::Fx;
+  using Base::Lu;
+  using Base::Luu;
+  using Base::Lx;
+  using Base::Lxu;
+  using Base::Lxx;
+  using Base::r;
+  using Base::xnext;
 };
 
 }  // namespace crocoddyl
