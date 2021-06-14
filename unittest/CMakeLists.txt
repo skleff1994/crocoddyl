@@ -23,6 +23,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   test_actuation
   test_activations
   test_costs
+  test_costs_noFF
   test_cost_sum
   test_contacts
   test_impulses
@@ -34,6 +35,7 @@ SET(${PROJECT_NAME}_CPP_TESTS
   # test_integrators
   test_diff_actions
   test_problem
+  test_cop_support
   test_friction_cone
   test_wrench_cone
   test_boxqp
