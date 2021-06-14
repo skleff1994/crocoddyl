@@ -36,7 +36,11 @@ IntegratedActionModelLPFTpl<Scalar>::IntegratedActionModelLPFTpl(
     enable_integration_ = false;
   }
   // overwrite the state
-  // state2_ = StateLPFTpl<Scalar> (static_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
+  // boost::shared_ptr<StateMultibody> state = boost::static_pointer_cast<StateMultibody>(state_);
+  boost::shared_ptr<DifferentialActionModelFreeFwdDynamics> dam = boost::static_pointer_cast<DifferentialActionModelFreeFwdDynamics>(differential_);
+  // state_ = StateLPFTpl<Scalar> (boost::static_pointer_cast<DifferentialActionModelFreeFwdDynamics>(differential_)->get_pinocchio(), nu_);
+  // state_ = StateLPFTpl<Scalar> (dam->get_pinocchio(), nu_);
+  // state_ = StateLPFTpl<Scalar> (boost::static_pointer_cast<DifferentialActionModelFreeFwdDynamicsTpl<Scalar>>(differential_)->get_pinocchio(), nu_);
 }
 
 // template <typename Scalar>

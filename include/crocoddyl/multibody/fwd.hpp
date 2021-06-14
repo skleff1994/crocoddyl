@@ -199,6 +199,8 @@ class WrenchConeTpl;
 // state
 template <typename Scalar>
 class StateMultibodyTpl;
+template <typename Scalar>
+class StateLPFTpl;
 
 // data collector
 template <typename Scalar>
@@ -325,6 +327,7 @@ typedef ContactModel6DTpl<double> ContactModel6D;
 typedef ContactData6DTpl<double> ContactData6D;
 
 typedef StateMultibodyTpl<double> StateMultibody;
+typedef StateLPFTpl<double> StateLPF;
 
 typedef DataCollectorMultibodyTpl<double> DataCollectorMultibody;
 typedef DataCollectorActMultibodyTpl<double> DataCollectorActMultibody;

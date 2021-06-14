@@ -219,13 +219,13 @@ void StateLPFTpl<Scalar>::Jintegrate(const Eigen::Ref<const VectorXs>& y, const 
       case addto:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::ADDTO);
-        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() += (Scalar)1
+        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() += (Scalar)1;
         Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() += (Scalar)1;
         break;
       case rmfrom:
         pinocchio::dIntegrate(*pinocchio_.get(), y.head(nq_), dy.head(nv_), Jsecond.topLeftCorner(nv_, nv_),
                               pinocchio::ARG1, pinocchio::RMTO);
-        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() -= (Scalar)1
+        Jsecond.block(nq_, nq_, nv_, nv_).diagonal().array() -= (Scalar)1;
         Jsecond.bottomRightCorner(nw_, nw_).diagonal().array() -= (Scalar)1;
         break;
       default:

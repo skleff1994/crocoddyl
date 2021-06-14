@@ -6,8 +6,8 @@
 // All rights reserved.
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef CROCODDYL_LPF_STATES_HPP_
-#define CROCODDYL_LPF_STATES_HPP_
+#ifndef CROCODDYL_MULTIBODY_STATES_STATELPF_HPP_
+#define CROCODDYL_MULTIBODY_STATES_STATELPF_HPP_
 #include "crocoddyl/multibody/fwd.hpp"
 #include "crocoddyl/core/state-base.hpp"
 #include <pinocchio/multibody/model.hpp>
@@ -59,7 +59,7 @@ class StateLPFTpl : public StateAbstractTpl<_Scalar> {
   using Base::ub_;
   std::size_t nw_;
   std::size_t ny_;
-  std::size_t ndy_
+  std::size_t ndy_;
 
  private:
   boost::shared_ptr<pinocchio::ModelTpl<Scalar> > pinocchio_;
@@ -74,4 +74,4 @@ class StateLPFTpl : public StateAbstractTpl<_Scalar> {
 /* --- Details -------------------------------------------------------------- */
 #include "crocoddyl/multibody/states/statelpf.hxx"
 
-#endif  // CROCODDYL_MULTIBODY_STATES_MULTIBODY_HPP_
+#endif  // CROCODDYL_MULTIBODY_STATES_STATELPF_HPP_
